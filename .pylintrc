@@ -1,0 +1,4 @@
+[MESSAGES CONTROL]
+
+disable=
+    logging-fstring-interpolation,

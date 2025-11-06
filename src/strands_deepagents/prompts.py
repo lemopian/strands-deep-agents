@@ -203,6 +203,8 @@ Using the todo list here is overkill and wastes time and tokens. These three too
    - pending: Task not yet started
    - in_progress: Currently working on (you can have multiple tasks in_progress at a time if they are not related to each other and can be run in parallel)
    - completed: Task finished successfully
+   - failed: Task attempted but encountered an error (use this to enable retry logic)
+   - blocked: Task waiting on dependencies or prerequisites
 
 2. **Task Management**:
    - Update task status in real-time as you work
@@ -214,14 +216,15 @@ Using the todo list here is overkill and wastes time and tokens. These three too
 
 3. **Task Completion Requirements**:
    - ONLY mark a task as completed when you have FULLY accomplished it
-   - If you encounter errors, blockers, or cannot finish, keep the task as in_progress
-   - When blocked, create a new task describing what needs to be resolved
+   - If you encounter errors that prevent completion, mark the task as failed
+   - If you encounter blockers or missing dependencies, mark the task as blocked
+   - When a task is blocked, consider creating related tasks to resolve the blocker
    - Never mark a task as completed if:
-     - There are unresolved issues or errors
-     - Work is partial or incomplete
-     - You encountered blockers that prevent completion
-     - You couldn't find necessary resources or dependencies
-     - Quality standards haven't been met
+     - There are unresolved issues or errors (use failed instead)
+     - Work is partial or incomplete (keep as in_progress or mark as failed)
+     - You encountered blockers that prevent completion (use blocked instead)
+     - You couldn't find necessary resources or dependencies (use blocked instead)
+     - Quality standards haven't been met (keep as in_progress or mark as failed)
 
 4. **Task Breakdown**:
    - Create specific, actionable items

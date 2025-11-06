@@ -5,10 +5,10 @@ Planning tool for DeepAgents - enables agents to create and manage TODO lists.
 import logging
 import traceback
 
-from typing import Literal
 from pydantic import BaseModel, Field
 from strands import tool, ToolContext
 from strands_deepagents.prompts import WRITE_TODOS_TOOL_DESCRIPTION
+from strands_deepagents.state import TodoStatus
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +20,7 @@ class TodoItem(BaseModel):
 
     id: str = Field(..., description="Unique identifier for the task")
     content: str = Field(..., description="Description of the task")
-    status: Literal["pending", "in_progress", "completed"] = Field(
-        ..., description="Current status of the task"
-    )
+    status: TodoStatus = Field(..., description="Current status of the task")
 
 
 @tool(context=True, description=WRITE_TODOS_TOOL_DESCRIPTION)
@@ -117,15 +115,25 @@ def write_todos(todos: list[TodoItem], tool_context: ToolContext, merge: bool = 
         logger.debug("💾 Todos saved to agent state")
 
         # Generate summary
-        status_counts = {"pending": 0, "in_progress": 0, "completed": 0}
+        status_counts = {
+            "pending": 0,
+            "in_progress": 0,
+            "completed": 0,
+            "failed": 0,
+            "blocked": 0,
+        }
 
         for todo in updated_todos:
-            status_counts[todo["status"]] += 1
+            status = todo["status"]
+            if status in status_counts:
+                status_counts[status] += 1
 
         summary = f"TODO list updated. Total: {len(updated_todos)} tasks\n"
         summary += f"- Pending: {status_counts['pending']}\n"
         summary += f"- In Progress: {status_counts['in_progress']}\n"
-        summary += f"- Completed: {status_counts['completed']}"
+        summary += f"- Completed: {status_counts['completed']}\n"
+        summary += f"- Failed: {status_counts['failed']}\n"
+        summary += f"- Blocked: {status_counts['blocked']}"
 
         logger.info(f"📊 Final summary: {status_counts}")
         print(summary)

@@ -7,6 +7,9 @@ from typing_extensions import TypedDict as TypedDictExt
 from pydantic import BaseModel, Field
 
 
+TodoStatus = Literal["pending", "in_progress", "completed", "failed", "blocked"]
+
+
 class Todo(TypedDict):
     """
     Todo item to track task progress.
@@ -14,11 +17,16 @@ class Todo(TypedDict):
     Attributes:
         content: Description of the todo item
         status: Current status of the todo
+            - pending: Task not yet started
+            - in_progress: Currently being worked on
+            - completed: Task finished successfully
+            - failed: Task attempted but encountered an error
+            - blocked: Task waiting on dependencies
     """
 
     id: str
     content: str
-    status: Literal["pending", "in_progress", "completed"]
+    status: TodoStatus
 
 
 def file_reducer(left: dict | None, right: dict | None) -> dict | None:
@@ -51,14 +59,3 @@ class DeepAgentState(TypedDictExt):
 
     todos: NotRequired[list[Todo]]
     files: Annotated[NotRequired[dict[str, str]], file_reducer]
-
-
-class PlanningState(TypedDictExt):
-    """
-    State for planning with todo tracking.
-
-    Attributes:
-        todos: List of todo items for tracking progress
-    """
-
-    todos: NotRequired[list[Todo]]

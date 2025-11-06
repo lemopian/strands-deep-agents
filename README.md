@@ -162,8 +162,6 @@ export BYPASS_TOOL_CONSENT=true
 
 This implementation is tightly integrated with the Strands Agents SDK ecosystem:
 
-### Native Strands Integration
-
 **Agent Creation**
 - Built on `strands.Agent` class as the core foundation
 - Supports both synchronous (`agent()`) and asynchronous (`agent.invoke_async()`) invocation
@@ -173,7 +171,7 @@ This implementation is tightly integrated with the Strands Agents SDK ecosystem:
 **Tool System**
 - Three approaches supported: function decorator, class-based tools, and module-based tools
 - Built on `@tool` decorator from Strands SDK with automatic schema generation from docstrings and type hints
-- Compatible with [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) community package for pre-built tools
+- Compatible with [`strands-agents-tools`](https://pypi.org/project/strands-agents-tools/) community package for pre-built tools as `file_read`, `file_write`, and `editor`
 - Supports async tools with concurrent execution
 - Tool streaming with progress updates via async generators
 - `ToolContext` provides access to agent state, tool use data, and invocation state
@@ -187,11 +185,11 @@ This implementation is tightly integrated with the Strands Agents SDK ecosystem:
 
 **State Management**
 - Three types of state: **Conversation History** (agent.messages), **Agent State** (key-value storage), and **Request State** (per-invocation context)
-- Agent state accessible via `agent.state.get()`, `agent.state.set()`, and `agent.state.delete()`
+- Agent state accessible via `agent.state.get()`, `agent.state.set()`,
 - JSON serialization validation ensures persistence compatibility
 - Tools access state through `ToolContext` parameter
 - Supports [session persistence](https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/session-management/) across application restarts
-- Custom `DeepAgentState` adds: `todos`, `file_system`, `current_plan` fields
+- Custom `DeepAgentState` adds: `todos`, `files` fields
 
 ## Documentation & Resources
 

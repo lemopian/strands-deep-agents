@@ -26,7 +26,14 @@ def main():
     # Create a deep agent with default configuration
     agent = create_deep_agent(
         instructions="You are a helpful assistant that excels at planning and executing complex tasks.",
-        model_id="global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        model="global.anthropic.claude-sonnet-4-5-20250929-v1:0",
+        subagents=[
+            {
+                "name": "general_purpose",
+                "description": "A general-purpose sub-agent that can be used for any task.",
+                "prompt": "You are a general-purpose sub-agent that can be used for any task.",
+            }
+        ],
     )
 
     # Example 1: Simple task with planning

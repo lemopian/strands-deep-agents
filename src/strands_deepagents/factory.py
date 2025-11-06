@@ -9,6 +9,7 @@ to work with the Strands Agents SDK architecture.
 from typing import List, Optional, Any, Dict, Sequence, Union, Callable
 from strands import Agent
 from strands.models import Model
+from strands.tools.executors import SequentialToolExecutor
 from strands_deepagents.types import SubAgent, CustomSubAgent
 from strands_tools import file_read, file_write, editor
 from strands_deepagents.tools.planning import write_todos
@@ -26,6 +27,7 @@ def create_deep_agent(
     model: Optional[str | Model] = None,
     subagents: Optional[List[Union[SubAgent, CustomSubAgent]]] = None,
     initial_state: Optional[Dict[str, Any]] = None,
+    disable_parallel_tool_calling: bool = False,
     **kwargs,
 ) -> Agent:
     """
@@ -47,6 +49,9 @@ def create_deep_agent(
             - (optional) `tools`: Tools specific to this subagent
             - (optional) `model`: Model override for this subagent
         initial_state: Initial agent state (todos, etc.)
+        disable_parallel_tool_calling: If True, disables parallel execution of tools and
+            sub-agents, forcing sequential execution. Useful for debugging or when tools
+            have dependencies.
         **kwargs: Additional arguments passed to Agent constructor
 
     Returns:
@@ -73,6 +78,12 @@ def create_deep_agent(
             subagents=[code_reviewer]
         )
 
+        # Create with sequential tool execution
+        agent = create_deep_agent(
+            instructions="You are a helpful assistant.",
+            disable_parallel_tool_calling=True
+        )
+
         # Use the agent
         result = agent("Help me build a calculator module")
         ```
@@ -97,6 +108,7 @@ def create_deep_agent(
         default_tools=all_tools,
         subagents=all_subagents,
         default_model=model,
+        disable_parallel_tool_calling=disable_parallel_tool_calling,
     )
 
     # Add the task tool to all_tools
@@ -120,10 +132,21 @@ def create_deep_agent(
     if "todos" not in agent_state:
         agent_state["todos"] = []
 
+    # Prepare agent kwargs
+    agent_kwargs = {
+        "system_prompt": system_prompt,
+        "tools": all_tools,
+        "model": model,
+        "state": agent_state,
+        **kwargs,
+    }
+
+    # Use SequentialToolExecutor if parallel execution is disabled
+    if disable_parallel_tool_calling:
+        agent_kwargs["tool_executor"] = SequentialToolExecutor()
+
     # Create and return the agent
-    agent = Agent(
-        system_prompt=system_prompt, tools=all_tools, model=model, state=agent_state, **kwargs
-    )
+    agent = Agent(**agent_kwargs)
 
     return agent
 
@@ -134,6 +157,7 @@ async def async_create_deep_agent(
     model: Optional[str | Model] = None,
     subagents: Optional[List[Union[SubAgent, CustomSubAgent]]] = None,
     initial_state: Optional[Dict[str, Any]] = None,
+    disable_parallel_tool_calling: bool = False,
     **kwargs,
 ) -> Agent:
     """
@@ -148,6 +172,9 @@ async def async_create_deep_agent(
         model: The model identifier to use (default: Claude Sonnet 4)
         subagents: List of specialized subagents
         initial_state: Initial agent state (todos, etc.)
+        disable_parallel_tool_calling: If True, disables parallel execution of tools and
+            sub-agents, forcing sequential execution. Useful for debugging or when tools
+            have dependencies.
         **kwargs: Additional arguments passed to Agent constructor
 
     Returns:
@@ -189,6 +216,7 @@ async def async_create_deep_agent(
         default_tools=all_tools,
         subagents=all_subagents,
         default_model=model,
+        disable_parallel_tool_calling=disable_parallel_tool_calling,
     )
 
     # Add the task tool to all_tools
@@ -212,9 +240,20 @@ async def async_create_deep_agent(
     if "todos" not in agent_state:
         agent_state["todos"] = []
 
+    # Prepare agent kwargs
+    agent_kwargs = {
+        "system_prompt": system_prompt,
+        "tools": all_tools,
+        "model": model,
+        "state": agent_state,
+        **kwargs,
+    }
+
+    # Use SequentialToolExecutor if parallel execution is disabled
+    if disable_parallel_tool_calling:
+        agent_kwargs["tool_executor"] = SequentialToolExecutor()
+
     # Create and return the agent
-    agent = Agent(
-        system_prompt=system_prompt, tools=all_tools, model=model, state=agent_state, **kwargs
-    )
+    agent = Agent(**agent_kwargs)
 
     return agent

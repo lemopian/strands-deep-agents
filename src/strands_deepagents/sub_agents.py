@@ -5,8 +5,9 @@ Sub-agent implementation using the Agents-as-Tools pattern from Strands.
 import logging
 from typing import List, Any, Union, Dict
 from strands import Agent, tool
+from strands.tools.executors import SequentialToolExecutor
 from strands_deepagents.types import SubAgent, CustomSubAgent
-from strands_deepagents.prompts import TASK_TOOL_DESCRIPTION
+from strands_deepagents.prompts import TASK_TOOL_DESCRIPTION, BASE_AGENT_PROMPT
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -33,6 +34,7 @@ def _build_subagents_configs(
     default_tools: List[Any],
     subagents: List[Union[SubAgent, CustomSubAgent]],
     default_model: str,
+    disable_parallel_tool_calling: bool = False,
 ) -> Dict[str, Dict[str, Any]]:
     """
     Build a dictionary of agent configurations (not instances) keyed by their names.
@@ -43,6 +45,7 @@ def _build_subagents_configs(
         default_tools: Default tools to include if sub_agent doesn't specify any
         subagents: List of all subagent configurations
         default_model: Default model if sub_agent doesn't specify one
+        disable_parallel_tool_calling: If True, sub-agents will use sequential tool execution
 
     Returns:
         Dictionary mapping agent names to configuration dicts
@@ -55,6 +58,9 @@ def _build_subagents_configs(
             "system_prompt": sub_agent_config.get("prompt", ""),
             "tools": sub_agent_config.get("tools", default_tools),
             "model": sub_agent_config.get("model", default_model),
+            "disable_parallel_tool_calling": sub_agent_config.get(
+                "disable_parallel_tool_calling", disable_parallel_tool_calling
+            ),
         }
 
     return configs
@@ -64,6 +70,7 @@ def create_task_tool(
     default_tools: List[Any],
     subagents: List[Union[SubAgent, CustomSubAgent]],
     default_model: str,
+    disable_parallel_tool_calling: bool = False,
 ) -> Any:
     """
     Create a single task tool that dispatches to multiple subagents.
@@ -75,12 +82,15 @@ def create_task_tool(
         default_tools: Default tools to include if sub_agent doesn't specify any
         subagents: List of all subagent configurations
         default_model: Default model if sub_agent doesn't specify one
+        disable_parallel_tool_calling: If True, sub-agents will use sequential tool execution
 
     Returns:
         A tool function that can execute any of the configured subagents
     """
     # Build the dictionary of agent configurations
-    subagents_configs = _build_subagents_configs(default_tools, subagents, default_model)
+    subagents_configs = _build_subagents_configs(
+        default_tools, subagents, default_model, disable_parallel_tool_calling
+    )
 
     # Format the tool description with available subagents
     sub_agents_desc = _get_subagents_description(subagents)
@@ -115,11 +125,17 @@ def create_task_tool(
 
             # Create a fresh Agent instance for each invocation
             # This prevents state accumulation across multiple calls
-            sub_agent = Agent(
-                system_prompt=config["system_prompt"],
-                tools=config["tools"],
-                model=config["model"],
-            )
+            agent_kwargs = {
+                "system_prompt": config["system_prompt"],
+                "tools": config["tools"],
+                "model": config["model"],
+            }
+
+            # Use SequentialToolExecutor if parallel execution is disabled
+            if config.get("disable_parallel_tool_calling", False):
+                agent_kwargs["tool_executor"] = SequentialToolExecutor()
+
+            sub_agent = Agent(**agent_kwargs)
 
             response = sub_agent(description)
             logger.info(f"✅ Subagent '{subagent_type}' completed successfully")
@@ -137,6 +153,7 @@ async def create_async_task_tool(
     default_tools: List[Any],
     subagents: List[Union[SubAgent, CustomSubAgent]],
     default_model: str,
+    disable_parallel_tool_calling: bool = False,
 ) -> Any:
     """
     Create a single async task tool that dispatches to multiple subagents.
@@ -147,12 +164,15 @@ async def create_async_task_tool(
         default_tools: Default tools to include if sub_agent doesn't specify any
         subagents: List of all subagent configurations
         default_model: Default model if sub_agent doesn't specify one
+        disable_parallel_tool_calling: If True, sub-agents will use sequential tool execution
 
     Returns:
         An async tool function that can execute any of the configured subagents
     """
     # Build the dictionary of agent configurations
-    subagents_configs = _build_subagents_configs(default_tools, subagents, default_model)
+    subagents_configs = _build_subagents_configs(
+        default_tools, subagents, default_model, disable_parallel_tool_calling
+    )
 
     # Format the tool description with available subagents
     sub_agents_desc = _get_subagents_description(subagents)
@@ -187,11 +207,17 @@ async def create_async_task_tool(
 
             # Create a fresh Agent instance for each invocation
             # This prevents state accumulation across multiple calls
-            sub_agent = Agent(
-                system_prompt=config["system_prompt"],
-                tools=config["tools"],
-                model=config["model"],
-            )
+            agent_kwargs = {
+                "system_prompt": config["system_prompt"],
+                "tools": config["tools"],
+                "model": config["model"],
+            }
+
+            # Use SequentialToolExecutor if parallel execution is disabled
+            if config.get("disable_parallel_tool_calling", False):
+                agent_kwargs["tool_executor"] = SequentialToolExecutor()
+
+            sub_agent = Agent(**agent_kwargs)
 
             response = await sub_agent.invoke_async(description)
             logger.info(f"✅ Async subagent '{subagent_type}' completed successfully")
@@ -223,7 +249,6 @@ def create_general_purpose_sub_agent(
     Returns:
         A SubAgent configuration for the general purpose agent
     """
-    from strands_deepagents.prompts import BASE_AGENT_PROMPT
 
     return {
         "name": "general-purpose",

@@ -27,7 +27,6 @@ classifiers = [
 dependencies = [
     "boto3>=1.40.50",
     "dotenv>=0.9.9",
-    "linkup>=0.1.4",
     "linkup-sdk>=0.8.0",
     "strands-agents>=0.1.0",
     "strands-agents-tools>=0.1.0",
@@ -43,10 +42,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/strands-agents/deepagents"
-Documentation = "https://github.com/strands-agents/deepagents#readme"
-Repository = "https://github.com/strands-agents/deepagents"
-Issues = "https://github.com/strands-agents/deepagents/issues"
+Homepage = "https://github.com/lemopian/strands-deep-agents/tree/main"
+Documentation = "https://github.com/lemopian/strands-deep-agents/tree/main#readme"
+Repository = "https://github.com/lemopian/strands-deep-agents/tree/main"
+Issues = "https://github.com/lemopian/strands-deep-agents/tree/main/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/strands_deepagents"]

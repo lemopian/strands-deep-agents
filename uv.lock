@@ -522,12 +522,6 @@ wheels = [
 ]
 
 [[package]]
-name = "linkup"
-version = "0.1.4"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/f2/f2/967ee965f80d9612d8589dbb2631b036a9c75e0ceae6136d478a7c87e3c8/linkup-0.1.4.tar.gz", hash = "sha256:60c25d6f075f82a5b248f7e28ab2d41a50075150874204d24566e4903b231379", size = 8423, upload-time = "2025-06-16T09:51:25.567Z" }
-
-[[package]]
 name = "linkup-sdk"
 version = "0.8.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1495,7 +1489,6 @@ source = { editable = "." }
 dependencies = [
     { name = "boto3" },
     { name = "dotenv" },
-    { name = "linkup" },
     { name = "linkup-sdk" },
     { name = "strands-agents" },
     { name = "strands-agents-tools" },
@@ -1524,7 +1517,6 @@ requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=23.0.0" },
     { name = "boto3", specifier = ">=1.40.50" },
     { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "linkup", specifier = ">=0.1.4" },
     { name = "linkup-sdk", specifier = ">=0.8.0" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },

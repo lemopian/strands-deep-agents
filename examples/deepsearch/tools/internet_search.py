@@ -1,3 +1,6 @@
+"""
+Tools for searching the web using Linkup and Tavily.
+"""
 import logging
 import random
 import asyncio

@@ -60,4 +60,6 @@ class DeepAgentState(TypedDictExt):
     """
 
     todos: NotRequired[list[Todo]]
-    files: Annotated[NotRequired[dict[str, str]], file_reducer]
+    files: Annotated[
+        NotRequired[dict[str, str]], file_reducer
+    ]  # TODO: make sure strands-tools file tools are used to update this

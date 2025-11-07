@@ -119,8 +119,6 @@ def write_todos(todos: list[TodoItem], tool_context: ToolContext, merge: bool = 
             "pending": 0,
             "in_progress": 0,
             "completed": 0,
-            "failed": 0,
-            "blocked": 0,
         }
 
         for todo in updated_todos:
@@ -131,9 +129,7 @@ def write_todos(todos: list[TodoItem], tool_context: ToolContext, merge: bool = 
         summary = f"TODO list updated. Total: {len(updated_todos)} tasks\n"
         summary += f"- Pending: {status_counts['pending']}\n"
         summary += f"- In Progress: {status_counts['in_progress']}\n"
-        summary += f"- Completed: {status_counts['completed']}\n"
-        summary += f"- Failed: {status_counts['failed']}\n"
-        summary += f"- Blocked: {status_counts['blocked']}"
+        summary += f"- Completed: {status_counts['completed']}"
 
         logger.info(f"📊 Final summary: {status_counts}")
         print(summary)

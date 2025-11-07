@@ -200,11 +200,9 @@ Using the todo list here is overkill and wastes time and tokens. These three too
 ## Task States and Management
 
 1. **Task States**: Use these states to track progress:
-   - pending: Task not yet started
-   - in_progress: Currently working on (you can have multiple tasks in_progress at a time if they are not related to each other and can be run in parallel)
-   - completed: Task finished successfully
-   - failed: Task attempted but encountered an error (use this to enable retry logic)
-   - blocked: Task waiting on dependencies or prerequisites
+   - pending: The task has been planned but is not yet being actively worked on. This is the default state for future tasks in the plan.
+   - in_progress: The agent has begun working on this task. The system prompt notes that the agent should have at least one task in this state to show it is active. Multiple tasks can be in_progress if they are independent and can be run in parallel (e.g., calling multiple subagents).
+   - completed: The task is fully accomplished, with no unresolved issues or blockers. The agent is instructed to mark tasks as completed immediately after finishing them.
 
 2. **Task Management**:
    - Update task status in real-time as you work
@@ -214,17 +212,15 @@ Using the todo list here is overkill and wastes time and tokens. These three too
    - IMPORTANT: When you write this todo list, you should mark your first task (or tasks) as in_progress immediately!.
    - IMPORTANT: Unless all tasks are completed, you should always have at least one task in_progress to show the user that you are working on something.
 
-3. **Task Completion Requirements**:
-   - ONLY mark a task as completed when you have FULLY accomplished it
-   - If you encounter errors that prevent completion, mark the task as failed
-   - If you encounter blockers or missing dependencies, mark the task as blocked
-   - When a task is blocked, consider creating related tasks to resolve the blocker
+3. **Error and Blocker Handling**:
+   - If you encounter errors, blockers, or cannot finish, keep the task as in_progress
+   - When blocked, create a new task describing what needs to be resolved
    - Never mark a task as completed if:
-     - There are unresolved issues or errors (use failed instead)
-     - Work is partial or incomplete (keep as in_progress or mark as failed)
-     - You encountered blockers that prevent completion (use blocked instead)
-     - You couldn't find necessary resources or dependencies (use blocked instead)
-     - Quality standards haven't been met (keep as in_progress or mark as failed)
+     - There are unresolved issues or errors (keep as in_progress)
+     - Work is partial or incomplete (keep as in_progress)
+     - You encountered blockers that prevent completion (keep as in_progress and create a new task for the blocker)
+     - You couldn't find necessary resources or dependencies (keep as in_progress and create a new task to address the dependency)
+     - Quality standards haven't been met (keep as in_progress)
 
 4. **Task Breakdown**:
    - Create specific, actionable items

@@ -11,6 +11,7 @@ Strands DeepAgents extends the [Strands Agents SDK](https://strandsagents.com/la
 - **Plan and Execute**: Break down complex tasks into actionable TODO lists with automatic progress tracking
 - **Delegate to Sub-Agents**: Create specialized sub-agents with custom tools and prompts for specific domains
 - **Manage State**: Maintain conversation history, file system state, and persistent context across interactions
+- **Persist Sessions**: Automatic state and conversation persistence with failure recovery using FileSessionManager or S3SessionManager
 - **Operate Asynchronously**: Full support for async/await patterns for concurrent task execution
 
 This implementation adapts concepts from [LangChain's DeepAgents](https://github.com/langchain-ai/deepagents) to work seamlessly with Strands' native architecture and tooling ecosystem.
@@ -41,6 +42,12 @@ This implementation adapts concepts from [LangChain's DeepAgents](https://github
 - Anthropic, OpenAI, and other providers via Strands
 - Per-agent model configuration
 
+**Session Persistence**
+- FileSessionManager for local file-based persistence
+- S3SessionManager for cloud-based distributed storage
+- Automatic state recovery after failures or restarts
+- Conversation history preservation across sessions
+
 ## Installation
 
 ### Prerequisites
@@ -64,6 +71,8 @@ pip install -e .
 ```
 
 ## Quick Start
+
+### Basic Usage
 
 ```python
 from strands_deepagents import create_deep_agent
@@ -105,6 +114,42 @@ for todo in todos:
     print(f"[{todo['status']}] {todo['content']}")
 ```
 
+### Session Persistence (Failure Recovery)
+
+```python
+from strands_deepagents import create_deep_agent, create_file_session_manager
+
+# Create a session manager for persistence
+session_manager = create_file_session_manager(
+    session_id="user-123",
+    storage_dir="./agent_sessions"
+)
+
+# Create agent with session persistence
+agent = create_deep_agent(
+    instructions="You are a helpful assistant.",
+    session_manager=session_manager
+)
+
+# First interaction
+agent("Hello, my name is Alice and I'm working on a Python project.")
+
+# Simulate failure or restart - create new agent with same session
+session_manager_restored = create_file_session_manager(
+    session_id="user-123",
+    storage_dir="./agent_sessions"
+)
+
+agent_restored = create_deep_agent(
+    instructions="You are a helpful assistant.",
+    session_manager=session_manager_restored
+)
+
+# Agent remembers the previous conversation
+agent_restored("What's my name and what am I working on?")
+# Response: "Your name is Alice and you're working on a Python project."
+```
+
 ## Testing
 
 ### Run the Test Suite
@@ -120,6 +165,7 @@ pytest tests/
 pytest tests/test_sub_agents.py
 pytest tests/test_planning.py
 pytest tests/test_factory.py
+pytest tests/test_session.py
 
 # Run with coverage
 pytest --cov=strands_deepagents tests/
@@ -142,6 +188,9 @@ python examples/sub_agents_example.py
 
 # Sequential execution example
 python examples/sequential_execution_example.py
+
+# Session persistence example
+python examples/session_persistence_example.py
 
 # DeepSearch example (advanced)
 python examples/deepsearch/agent.py
@@ -191,6 +240,13 @@ This implementation is tightly integrated with the Strands Agents SDK ecosystem:
 - Supports [session persistence](https://strandsagents.com/latest/documentation/docs/user-guide/concepts/agents/session-management/) across application restarts
 - Custom `DeepAgentState` adds: `todos`, `files` fields
 
+**Session Persistence**
+- Built-in support for `FileSessionManager` (local filesystem) and `S3SessionManager` (Amazon S3)
+- Automatic state and conversation history persistence across agent invocations
+- Failure recovery: agents can resume from exact state after crashes or restarts
+- Helper utilities: `create_file_session_manager()`, `create_s3_session_manager()`, `get_session_storage_path()`
+- Session data includes: conversation messages, agent state (todos, custom state), conversation manager state
+
 ## Documentation & Resources
 
 **Strands Agents**
@@ -208,6 +264,7 @@ See the [`examples/`](./examples) directory for comprehensive usage examples:
 - **`basic_usage.py`**: Simple agent with planning and file operations
 - **`sub_agents_example.py`**: Multiple specialized sub-agents working together
 - **`sequential_execution_example.py`**: Sequential task execution patterns
+- **`session_persistence_example.py`**: Session persistence and failure recovery demonstrations
 - **`deepsearch/`**: Advanced research agent with citations and internet search
 
 ## Architecture

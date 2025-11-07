@@ -4,10 +4,9 @@ State definitions for Strands DeepAgents.
 
 from typing import NotRequired, Literal, Annotated, TypedDict
 from typing_extensions import TypedDict as TypedDictExt
-from pydantic import BaseModel, Field
 
 
-TodoStatus = Literal["pending", "in_progress", "completed", "failed", "blocked"]
+TodoStatus = Literal["pending", "in_progress", "completed"]
 
 
 class Todo(TypedDict):
@@ -17,11 +16,14 @@ class Todo(TypedDict):
     Attributes:
         content: Description of the todo item
         status: Current status of the todo
-            - pending: Task not yet started
-            - in_progress: Currently being worked on
-            - completed: Task finished successfully
-            - failed: Task attempted but encountered an error
-            - blocked: Task waiting on dependencies
+            - pending: Task not yet started (default state for future tasks)
+            - in_progress: Currently being worked on (agent should have at least
+              one task in this state to show it is active)
+            - completed: Task finished successfully with no unresolved issues or blockers
+
+    Error/Blocker Handling:
+        - If you encounter errors or blockers, keep the task as in_progress
+        - When blocked, create a new task describing what needs to be resolved
     """
 
     id: str

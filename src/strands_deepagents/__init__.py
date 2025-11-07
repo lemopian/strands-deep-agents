@@ -6,6 +6,7 @@ This package provides tools for creating "deep" agents capable of:
 - File system operations (using strands_tools)
 - Sub-agent delegation
 - Multi-step reasoning and execution
+- Session persistence for state recovery
 
 Adapted from the LangChain DeepAgents pattern to work with Strands Agents SDK.
 """
@@ -14,6 +15,11 @@ from strands_deepagents.factory import create_deep_agent, async_create_deep_agen
 from strands_deepagents.types import SubAgent, CustomSubAgent
 from strands_deepagents.state import DeepAgentState, Todo, TodoStatus
 from strands_deepagents.ai_models import get_default_model
+from strands_deepagents.session import (
+    create_file_session_manager,
+    create_s3_session_manager,
+    get_session_storage_path,
+)
 
 __version__ = "0.1.0"
 
@@ -26,4 +32,7 @@ __all__ = [
     "Todo",
     "TodoStatus",
     "get_default_model",
+    "create_file_session_manager",
+    "create_s3_session_manager",
+    "get_session_storage_path",
 ]

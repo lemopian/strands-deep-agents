@@ -10,6 +10,7 @@ from typing import List, Optional, Any, Dict, Sequence, Union, Callable
 from strands import Agent
 from strands.models import Model
 from strands.tools.executors import SequentialToolExecutor
+from strands.session.session_manager import SessionManager
 from strands_deepagents.types import SubAgent, CustomSubAgent
 from strands_tools import file_read, file_write, editor
 from strands_deepagents.tools.planning import write_todos
@@ -28,6 +29,7 @@ def create_deep_agent(
     subagents: Optional[List[Union[SubAgent, CustomSubAgent]]] = None,
     initial_state: Optional[Dict[str, Any]] = None,
     disable_parallel_tool_calling: bool = False,
+    session_manager: Optional[SessionManager] = None,
     **kwargs,
 ) -> Agent:
     """
@@ -52,6 +54,10 @@ def create_deep_agent(
         disable_parallel_tool_calling: If True, disables parallel execution of tools and
             sub-agents, forcing sequential execution. Useful for debugging or when tools
             have dependencies.
+        session_manager: Optional session manager for persisting agent state and conversation
+            history across sessions. Use FileSessionManager for local persistence or
+            S3SessionManager for cloud-based persistence. If provided, the agent will
+            automatically restore state from previous sessions and persist changes.
         **kwargs: Additional arguments passed to Agent constructor
 
     Returns:
@@ -82,6 +88,18 @@ def create_deep_agent(
         agent = create_deep_agent(
             instructions="You are a helpful assistant.",
             disable_parallel_tool_calling=True
+        )
+
+        # Create with session persistence (file-based)
+        from strands.session.file_session_manager import FileSessionManager
+
+        session_manager = FileSessionManager(
+            session_id="user-123",
+            storage_dir="./sessions"
+        )
+        agent = create_deep_agent(
+            instructions="You are a helpful assistant.",
+            session_manager=session_manager
         )
 
         # Use the agent
@@ -141,6 +159,10 @@ def create_deep_agent(
         **kwargs,
     }
 
+    # Add session manager if provided
+    if session_manager is not None:
+        agent_kwargs["session_manager"] = session_manager
+
     # Use SequentialToolExecutor if parallel execution is disabled
     if disable_parallel_tool_calling:
         agent_kwargs["tool_executor"] = SequentialToolExecutor()
@@ -158,6 +180,7 @@ async def async_create_deep_agent(
     subagents: Optional[List[Union[SubAgent, CustomSubAgent]]] = None,
     initial_state: Optional[Dict[str, Any]] = None,
     disable_parallel_tool_calling: bool = False,
+    session_manager: Optional[SessionManager] = None,
     **kwargs,
 ) -> Agent:
     """
@@ -175,6 +198,10 @@ async def async_create_deep_agent(
         disable_parallel_tool_calling: If True, disables parallel execution of tools and
             sub-agents, forcing sequential execution. Useful for debugging or when tools
             have dependencies.
+        session_manager: Optional session manager for persisting agent state and conversation
+            history across sessions. Use FileSessionManager for local persistence or
+            S3SessionManager for cloud-based persistence. If provided, the agent will
+            automatically restore state from previous sessions and persist changes.
         **kwargs: Additional arguments passed to Agent constructor
 
     Returns:
@@ -183,11 +210,18 @@ async def async_create_deep_agent(
     Example:
         ```python
         from strands_deepagents import async_create_deep_agent
+        from strands.session.file_session_manager import FileSessionManager
         import asyncio
 
         async def main():
+            # Create with session persistence
+            session_manager = FileSessionManager(
+                session_id="async-user-123",
+                storage_dir="./sessions"
+            )
             agent = await async_create_deep_agent(
-                instructions="You are a helpful assistant."
+                instructions="You are a helpful assistant.",
+                session_manager=session_manager
             )
             result = await agent.invoke_async("Help me with a task")
             print(result)
@@ -248,6 +282,10 @@ async def async_create_deep_agent(
         "state": agent_state,
         **kwargs,
     }
+
+    # Add session manager if provided
+    if session_manager is not None:
+        agent_kwargs["session_manager"] = session_manager
 
     # Use SequentialToolExecutor if parallel execution is disabled
     if disable_parallel_tool_calling:

@@ -6,6 +6,8 @@ Build sophisticated AI agent systems with planning, sub-agent delegation, and mu
 
 ![Deep Agents Overview](https://raw.githubusercontent.com/lemopian/strands-deep-agents/main/docs/img/deep-agent-overview.png)
 
+Check the related [article](http://pierreange.ai/blog/deep-agents-using-strands) for more details.
+
 Deep Agents enables AI systems to handle complex, multi-step tasks through:
 - 🧠 **Strategic Planning** - Break down complex tasks into actionable TODOs
 - 🤝 **Sub-agent Orchestration** - Delegate specialized tasks to focused agents
@@ -15,7 +17,6 @@ Deep Agents enables AI systems to handle complex, multi-step tasks through:
 
 **Featured Example**: [DeepSearch](#deepsearch-advanced-research-agent) - A production-ready research agent demonstrating sub-agent orchestration, parallel research, and intelligent synthesis.
 
-Check the related [article](http://pierreange.ai/blog/deep-agents-using-strands) for more details.
 
 ## Installation
 

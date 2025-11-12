@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 from strands.session.file_session_manager import FileSessionManager
 
-from strands_deepagents import create_deep_agent
+from strands_deep_agents import create_deep_agent
 
 
 @pytest.fixture

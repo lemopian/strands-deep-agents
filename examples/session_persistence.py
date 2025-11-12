@@ -13,7 +13,7 @@ from pathlib import Path
 
 from strands.session.file_session_manager import FileSessionManager
 
-from strands_deepagents import create_deep_agent
+from strands_deep_agents import create_deep_agent
 
 
 def example_basic_session_persistence():

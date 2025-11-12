@@ -1,7 +1,7 @@
 include README.md
 include LICENSE
 include pyproject.toml
-recursive-include src/strands_deepagents *.py
+recursive-include src/strands_deep_agents *.py
 recursive-include examples *.py *.md
 recursive-exclude examples __pycache__
 recursive-exclude examples *.pyc

@@ -6,7 +6,7 @@ to force sequential execution of tools and sub-agents, which can be useful
 for debugging or when tools have dependencies on each other.
 """
 
-from strands_deepagents import create_deep_agent
+from strands_deep_agents import create_deep_agent
 
 
 def main():

@@ -7,7 +7,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from strands import tool
 
-from strands_deepagents.sub_agents import (
+from strands_deep_agents.sub_agents import (
     _build_subagents_configs,
     _get_subagents_description,
     create_async_task_tool,
@@ -202,7 +202,7 @@ class TestSubAgentExecution:
         assert "invalid_agent" in result
         assert "valid_agent" in result
 
-    @patch("strands_deepagents.sub_agents.Agent")
+    @patch("strands_deep_agents.sub_agents.Agent")
     def test_task_tool_execution_success(self, mock_agent_class, default_model):
         """Test successful task tool execution."""
         mock_agent_instance = Mock()
@@ -223,7 +223,7 @@ class TestSubAgentExecution:
         mock_agent_class.assert_called_once()
         mock_agent_instance.assert_called_once_with("Test task")
 
-    @patch("strands_deepagents.sub_agents.Agent")
+    @patch("strands_deep_agents.sub_agents.Agent")
     def test_task_tool_execution_exception(self, mock_agent_class, default_model):
         """Test exception handling during task execution."""
         mock_agent_instance = Mock()
@@ -307,7 +307,7 @@ class TestAsyncSubAgentCreation:
         assert "invalid_async" in result
 
     @pytest.mark.anyio
-    @patch("strands_deepagents.sub_agents.Agent")
+    @patch("strands_deep_agents.sub_agents.Agent")
     async def test_async_task_tool_execution(self, mock_agent_class, default_model):
         """Test async task tool execution."""
         mock_agent_instance = Mock()

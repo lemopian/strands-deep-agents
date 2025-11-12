@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/strands-deepagents
+      url: https://pypi.org/p/strands-deep-agents
     permissions:
       id-token: write # IMPORTANT: mandatory for trusted publishing
 
@@ -90,7 +90,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: testpypi
-      url: https://test.pypi.org/p/strands-deepagents
+      url: https://test.pypi.org/p/strands-deep-agents
     permissions:
       id-token: write # IMPORTANT: mandatory for trusted publishing
 

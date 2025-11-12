@@ -4,7 +4,7 @@ Tests for the factory functions.
 
 from strands import Agent, tool
 
-from strands_deepagents import create_deep_agent
+from strands_deep_agents import create_deep_agent
 
 
 class TestCreateDeepAgent:
@@ -283,7 +283,7 @@ class TestFactoryIntegration:
         """Test that agent can use write_todos tool."""
         from strands import ToolContext
 
-        from strands_deepagents.tools import TodoItem, write_todos
+        from strands_deep_agents.tools import TodoItem, write_todos
 
         tool_use = {"toolUseId": "test-11", "name": "write_todos", "input": {}}
         tool_context = ToolContext(

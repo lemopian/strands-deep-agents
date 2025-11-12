@@ -5,7 +5,7 @@ Tests for planning tools (write_todos).
 import pytest
 from strands import ToolContext
 
-from strands_deepagents.tools import TodoItem, write_todos
+from strands_deep_agents.tools import TodoItem, write_todos
 
 
 class TestPlanningTools:

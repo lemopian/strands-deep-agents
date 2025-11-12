@@ -9,7 +9,7 @@ This example demonstrates:
 
 from strands import tool
 
-from strands_deepagents import SubAgent, create_deep_agent
+from strands_deep_agents import SubAgent, create_deep_agent
 
 
 # Create a custom tool for the code reviewer

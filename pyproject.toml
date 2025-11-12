@@ -48,7 +48,7 @@ Repository = "https://github.com/lemopian/strands-deep-agents/tree/main"
 Issues = "https://github.com/lemopian/strands-deep-agents/tree/main/issues"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/strands_deepagents"]
+packages = ["src/strands_deep_agents"]
 
 [dependency-groups]
 dev = [

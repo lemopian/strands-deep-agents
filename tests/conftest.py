@@ -59,7 +59,7 @@ def sample_sub_agent():
 @pytest.fixture
 def agent_with_planning():
     """Provide an agent with planning tools."""
-    from strands_deepagents.tools import write_todos
+    from strands_deep_agents.tools import write_todos
 
     return Agent(tools=[write_todos])
 

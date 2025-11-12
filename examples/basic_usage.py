@@ -8,7 +8,7 @@ This example demonstrates:
 - Handling multi-step tasks
 """
 
-from strands_deepagents import create_deep_agent
+from strands_deep_agents import create_deep_agent
 
 
 def main():

@@ -22,8 +22,8 @@ from strands_tools import file_read, file_write, tavily
 from tools import internet_search
 from urllib3.exceptions import ProtocolError
 
-from strands_deepagents import SubAgent, create_deep_agent
-from strands_deepagents.ai_models import basic_claude_haiku_4_5
+from strands_deep_agents import SubAgent, create_deep_agent
+from strands_deep_agents.ai_models import basic_claude_haiku_4_5
 
 # Configure logging for better visibility
 # Use a file handler to avoid console output corruption during streaming
@@ -41,7 +41,7 @@ logger.setLevel(logging.INFO)
 strands_logger = logging.getLogger("strands")
 strands_logger.setLevel(logging.WARNING)  # Reduce noise
 
-deepagents_logger = logging.getLogger("strands_deepagents")
+deepagents_logger = logging.getLogger("strands_deep_agents")
 deepagents_logger.setLevel(logging.INFO)  # Reduce from DEBUG
 
 print(f"Logging to: {log_file}")

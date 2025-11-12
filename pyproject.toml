@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "strands-deep-agents"
-version = "0.1.0"
+version = "0.1.1"
 description = "DeepAgents implementation using Strands Agents SDK - creating planning-capable agents with sub-agents and virtual file systems"
 readme = "README.md"
 requires-python = ">=3.12"

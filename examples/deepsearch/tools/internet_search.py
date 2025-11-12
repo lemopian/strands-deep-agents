@@ -1,19 +1,22 @@
 """
 Tools for searching the web using Linkup and Tavily.
 """
+
+import asyncio
 import logging
 import random
-import asyncio
-from linkup import LinkupClient
-from strands_tools import tavily
-from strands import tool
+
 from dotenv import load_dotenv
+from linkup import LinkupClient
+from strands import tool
+from strands_tools import tavily
 
 load_dotenv()
 
 logger = logging.getLogger(__name__)
 
 logger.setLevel(logging.DEBUG)
+
 
 @tool
 def linkup_search(query: str) -> str:
@@ -35,6 +38,7 @@ def linkup_search(query: str) -> str:
 
     return str(response)
 
+
 @tool
 def internet_search(query: str) -> str:
     """Search the web using the internet
@@ -43,7 +47,11 @@ def internet_search(query: str) -> str:
     Returns:
         The search results
     """
-    internet_tools = ["linkup_search", "tavily_search"]
+    internet_tools = [
+        "linkup_search",
+        # "tavily_search", # If you have tavily credits, you can use it here
+        # Add your favorite internet tools here
+    ]
     selected_tool = random.choice(internet_tools)
     logger.debug(f"Using tool: {selected_tool}")
     if selected_tool == "linkup_search":

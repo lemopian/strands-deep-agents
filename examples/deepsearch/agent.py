@@ -10,23 +10,28 @@ This example demonstrates a sophisticated research agent architecture with:
 
 import argparse
 import logging
-from strands_tools import tavily
-from tools import internet_search
-from dotenv import load_dotenv
+import os
+import time
+
+from prompts.citations_agent import CITATIONS_AGENT_PROMPT
 from prompts.research_lead import RESEARCH_LEAD_PROMPT
 from prompts.research_subagent import RESEARCH_SUBAGENT_PROMPT
-from prompts.citations_agent import CITATIONS_AGENT_PROMPT
-from strands_deepagents import create_deep_agent, SubAgent
+from strands.session.file_session_manager import FileSessionManager
+from strands.types.exceptions import EventLoopException
+from strands_tools import file_read, file_write, tavily
+from tools import internet_search
+from urllib3.exceptions import ProtocolError
+
+from strands_deepagents import SubAgent, create_deep_agent
 from strands_deepagents.ai_models import basic_claude_haiku_4_5
 
-load_dotenv()
-
-
 # Configure logging for better visibility
+# Use a file handler to avoid console output corruption during streaming
+log_file = "/tmp/deepsearch.log"
 logging.basicConfig(
     level=logging.INFO,
-    format="%(levelname)s | %(name)s | %(message)s",
-    handlers=[logging.StreamHandler()],
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    handlers=[logging.FileHandler(log_file, mode="w"), logging.StreamHandler()],
 )
 
 # Configure specific loggers
@@ -34,10 +39,12 @@ logger = logging.getLogger("deepsearch")
 logger.setLevel(logging.INFO)
 
 strands_logger = logging.getLogger("strands")
-strands_logger.setLevel(logging.INFO)
+strands_logger.setLevel(logging.WARNING)  # Reduce noise
 
 deepagents_logger = logging.getLogger("strands_deepagents")
-deepagents_logger.setLevel(logging.DEBUG)
+deepagents_logger.setLevel(logging.INFO)  # Reduce from DEBUG
+
+print(f"Logging to: {log_file}")
 
 
 def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
@@ -71,11 +78,12 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
         description=(
             "Specialized research agent for conducting focused investigations on specific topics. "
             "Use this agent to research specific questions, gather facts, analyze sources, and compile findings. "
-            f"This agent has access to {tool_name} for comprehensive web search capabilities."
+            f"This agent has access to {tool_name} for comprehensive web search capabilities. "
+            "Results are written to files to keep context lean."
         ),
         prompt=subagent_prompt,
-        tools=[research_tool],
-        # model is not specified here, so it inherits the default model with interleaved thinking enabled
+        tools=[research_tool, file_write],
+        model=basic_claude_haiku_4_5(),  # Use Haiku to avoid streaming corruption with large responses
     )
 
     # Citations agent - adds source references to reports
@@ -86,21 +94,43 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
             "Use this agent after completing a research report to add proper source citations. "
             "Provide the report text in <synthesized_text> tags along with the source list."
         ),
-        model=basic_claude_haiku_4_5(),  # No need for extended thinking nor interleaved-thinking, also, a lighter model is faster, cheaper and sufficient for this task.
+        model=basic_claude_haiku_4_5(),
         prompt=CITATIONS_AGENT_PROMPT,
-        tools=[],  # No tools needed - just text processing
+        tools=[file_read, file_write],  # No tools needed - just text processing
+    )
+    # Disable session persistence to avoid massive context accumulation
+    session_id = "pa-task-session"
+    storage_dir = "./.agent_sessions"
+    session_manager = FileSessionManager(
+        session_id=session_id,
+        storage_dir=storage_dir,
     )
 
     # Create the research lead agent
     agent = create_deep_agent(
-        instructions=lead_prompt,
+        instructions=lead_prompt
+        + """
+
+IMPORTANT CONTEXT MANAGEMENT:
+- Research subagents write their findings to files (./research_findings_*.md) in the current directory to keep context lean
+- When ready to synthesize, use file_read to read the research findings files from the current directory (./research_findings_*.md)
+- Synthesize all findings into a comprehensive report
+- Write the final report to the requested filename using file_write with current directory prefix (e.g., ./report_name.md)
+- ALWAYS use the current directory prefix `./` for all file paths
+- At the end, Call the citations agent to add the citations to the report.
+""",
         subagents=[research_subagent, citations_agent],
+        tools=[file_read, file_write],
+        session_manager=session_manager,
     )
 
     return agent
 
 
 def main():
+    bypass_consent = os.environ.get("BYPASS_TOOL_CONSENT", "true")
+    logger.info(f"BYPASS_TOOL_CONSENT status: {bypass_consent}")
+
     # pass the prompt using terminal args
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -112,14 +142,10 @@ def main():
 
 1. What are the main AI safety concerns and challenges?
 2. What organizations and initiatives are leading AI safety research?
-3. What recent developments or breakthroughs have occurred?
-4. What regulatory frameworks are being developed?
 
 Create a comprehensive research report with:
 -- Executive summary
 -- Detailed findings for each question
--- Analysis of current trends
--- Future outlook
 
 Plan your research approach using multiple research subagents for different aspects.
 """,
@@ -130,10 +156,54 @@ Plan your research approach using multiple research subagents for different aspe
     # Create DeepSearch agent
     agent = create_deepsearch_agent(research_tool=internet_search)
 
-    result = agent(prompt)
+    # Wrap agent execution in a retry loop for ProtocolError
+    max_retries = 3
+    retry_delay = 5
+    result = None
 
-    logger.info("\nResearch Result:")
-    logger.info(result)
+    for attempt in range(max_retries):
+        try:
+            logger.info(f"Starting agent execution (attempt {attempt + 1}/{max_retries})...")
+            result = agent(prompt)
+            logger.info("Agent execution completed successfully!")
+            break  # Success, exit retry loop
+        except (ProtocolError, EventLoopException) as e:
+            # Check if it's a streaming/connection error
+            error_msg = str(e).lower()
+            is_retryable = any(
+                keyword in error_msg
+                for keyword in [
+                    "response ended prematurely",
+                    "protocol error",
+                    "connection",
+                    "timeout",
+                ]
+            )
+
+            if is_retryable:
+                logger.warning(
+                    f"Streaming error encountered (attempt {attempt + 1}/{max_retries}): {e}"
+                )
+                if attempt < max_retries - 1:
+                    logger.info(f"Retrying in {retry_delay} seconds...")
+                    time.sleep(retry_delay)
+                else:
+                    logger.error("All retry attempts exhausted. Please try again later.")
+                    raise
+            else:
+                # Non-retryable error, re-raise immediately
+                logger.error(f"Non-retryable error: {e}")
+                raise
+        except Exception as e:
+            logger.error(f"Unexpected error during agent execution: {e}")
+            raise  # Re-raise other exceptions
+
+    if result is None:
+        logger.error("Agent execution failed after all retries")
+        return
+
+    logger.info("\nResearch completed successfully!")
+    logger.info(f"Agent response: {result}")
 
     # Show the research plan
     todos = agent.state.get("todos")

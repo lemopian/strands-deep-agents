@@ -7,9 +7,9 @@ This example demonstrates:
 - Using the general_purpose sub-agent for context quarantine
 """
 
-import os
-from strands_deepagents import create_deep_agent, SubAgent
 from strands import tool
+
+from strands_deepagents import SubAgent, create_deep_agent
 
 
 # Create a custom tool for the code reviewer
@@ -89,16 +89,16 @@ def main():
     result = agent(
         """
     Please complete this development task:
-    
+
     1. Create a Python web scraper (scraper.py) that:
        - Fetches content from a URL
        - Parses HTML to extract specific data
        - Handles errors gracefully
-    
+
     2. Have the code_reviewer review the code for quality
-    
+
     3. Have the documentation_writer create a README.md with usage instructions
-    
+
     Plan this out first, then execute each step.
     """
     )

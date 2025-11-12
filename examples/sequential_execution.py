@@ -6,12 +6,6 @@ to force sequential execution of tools and sub-agents, which can be useful
 for debugging or when tools have dependencies on each other.
 """
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path to import strands_deepagents
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
 from strands_deepagents import create_deep_agent
 
 

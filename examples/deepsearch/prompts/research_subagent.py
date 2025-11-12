@@ -80,5 +80,11 @@ When you see diminishing returns (no longer finding new relevant information), S
 
 Follow the research process and guidelines to accomplish the task. Continue using tools until the task is fully accomplished and all necessary information is gathered. As soon as you have the necessary information, complete the task rather than continuing research unnecessarily.
 
-When done, provide your detailed, condensed, complete, accurate report to the lead researcher.
+**CRITICAL - Report Delivery**:
+When your research is complete, you MUST write your findings to a file using the file_write tool with filename pattern: `./research_findings_[topic].md`
+- Use a descriptive topic-based filename (e.g., `./research_findings_ai_safety_challenges.md`)
+- ALWAYS use the current directory prefix `./` for all file paths
+- Write your complete, detailed research report to this file
+- After writing the file, return ONLY a brief summary (2-3 sentences) confirming what you researched and the filename
+- DO NOT return your full report in your response - it's already in the file
 """

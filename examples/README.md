@@ -271,7 +271,7 @@ try:
         data = scraper.scrape(url, selectors)
         if data:
             results.append(data)
-    
+
     print(f"Successfully scraped {len(results)} pages")
 finally:
     scraper.close()
@@ -327,7 +327,7 @@ selectors = {
 try:
     url = 'https://example-shop.com/product/12345'
     product_data = scraper.scrape(url, selectors, retries=5)
-    
+
     if product_data:
         print("Product Information:")
         print("-" * 50)
@@ -363,7 +363,7 @@ selectors = {'title': 'h1'}
 try:
     for url in urls:
         logger.info(f"Attempting to scrape: {url}")
-        
+
         try:
             data = scraper.scrape(url, selectors, retries=3)
             if data:
@@ -408,7 +408,7 @@ soup = scraper.parse_html(html)
 if soup:
     # Extract all article titles
     articles = soup.select('article.news-item')
-    
+
     all_articles = []
     for article in articles:
         article_data = {
@@ -418,7 +418,7 @@ if soup:
             'date': article.select_one('time').get('datetime')
         }
         all_articles.append(article_data)
-    
+
     print(f"Found {len(all_articles)} articles")
     for article in all_articles:
         print(f"- {article['title']} by {article['author']}")
@@ -440,19 +440,19 @@ scraper = WebScraper(
 try:
     # Fetch page
     html = scraper.fetch_url('https://example.com/dynamic-content')
-    
+
     if html:
         # Some sites require parsing delay
         time.sleep(2)
-        
+
         soup = scraper.parse_html(html)
-        
+
         # Extract data with fallback selectors
         selectors = {
             'title': 'h1.main-title, h1.title, h1',
             'description': 'div.description, p.desc, div.content p:first-child'
         }
-        
+
         data = scraper.extract_data(soup, selectors)
         print(data)
 finally:

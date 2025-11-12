@@ -8,7 +8,6 @@ This example demonstrates:
 - Handling multi-step tasks
 """
 
-import os
 from strands_deepagents import create_deep_agent
 
 
@@ -46,7 +45,7 @@ def main():
     1. Has functions for add, subtract, multiply, and divide
     2. Includes proper docstrings
     3. Has a main function that demonstrates usage
-    
+
     Please plan this task first, then execute.
     """
     )

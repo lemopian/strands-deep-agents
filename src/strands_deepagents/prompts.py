@@ -191,7 +191,7 @@ Assistant: I'll help you order a pizza from Dominos, order a burger from McDonal
 *Orders a salad from Subway*
 
 <reasoning>
-Even though this is a multi-step task, assuming the assistant has the ability to order from these restaurants, it is very straightforward and can be completed in three trivial tool calls. 
+Even though this is a multi-step task, assuming the assistant has the ability to order from these restaurants, it is very straightforward and can be completed in three trivial tool calls.
 Using the todo list here is overkill and wastes time and tokens. These three tool calls should be made in parallel, in fact.
 </reasoning>
 </example>
@@ -231,7 +231,7 @@ Being proactive with task management demonstrates attentiveness and ensures you 
 Remember: If you only need to make a few tool calls to complete a task, and it is clear what you need to do, it is better to just do the task directly and NOT call this tool at all.
 """
 
-TASK_TOOL_DESCRIPTION = """Launch an ephemeral subagent to handle complex, multi-step independent tasks with isolated context windows. 
+TASK_TOOL_DESCRIPTION = """Launch an ephemeral subagent to handle complex, multi-step independent tasks with isolated context windows.
 
 Available agent types and the tools they have access to:
 {sub_agents}
@@ -272,7 +272,7 @@ function isPrime(n) {{
 Since significant content was created and the task was completed, now use the content-reviewer agent to review the work
 </commentary>
 assistant: Now let me use the content-reviewer agent to review the code
-assistant: Uses the Task tool to launch with the content-reviewer agent 
+assistant: Uses the Task tool to launch with the content-reviewer agent
 </example>
 
 <example>
@@ -294,7 +294,7 @@ assistant: "I'm going to use the Task tool to launch with the greeting-responder
 
 WRITE_TODOS_SYSTEM_PROMPT = """## `write_todos`
 
-You have access to the `write_todos` tool to help you manage and plan complex objectives. 
+You have access to the `write_todos` tool to help you manage and plan complex objectives.
 Use this tool for complex objectives to ensure that you are tracking each necessary step and giving the user visibility into your progress.
 This tool is very helpful for planning complex objectives, and for breaking down these larger complex objectives into smaller steps.
 

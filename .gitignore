@@ -25,6 +25,7 @@ MANIFEST
 
 # Virtual Environment
 venv/
+.venv/
 env/
 ENV/
 env.bak/
@@ -38,6 +39,8 @@ venv.bak/
 *~
 .DS_Store
 
+# Ruff
+.ruff_cache/
 # Testing
 .pytest_cache/
 .coverage
@@ -63,3 +66,6 @@ dmypy.json
 
 # Pypi
 scripts/publish.sh
+
+# Agent sessions
+.agent_sessions/

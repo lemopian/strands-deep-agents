@@ -7,4 +7,3 @@ recursive-exclude examples __pycache__
 recursive-exclude examples *.pyc
 recursive-exclude tests *
 recursive-exclude * *.egg-info
-

@@ -2,15 +2,14 @@
 Tests for session management functionality in Strands DeepAgents.
 """
 
-import pytest
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
-from strands_deepagents import (
-    create_deep_agent,
-    create_file_session_manager,
-    get_session_storage_path,
-)
+
+import pytest
+from strands.session.file_session_manager import FileSessionManager
+
+from strands_deepagents import create_deep_agent
 
 
 @pytest.fixture
@@ -27,7 +26,7 @@ def test_create_file_session_manager(temp_session_dir):
     """
     Test creating a FileSessionManager.
     """
-    session_manager = create_file_session_manager(
+    session_manager = FileSessionManager(
         session_id="test-session",
         storage_dir=temp_session_dir,
     )
@@ -40,7 +39,7 @@ def test_agent_with_session_manager(temp_session_dir):
     """
     Test creating an agent with a session manager.
     """
-    session_manager = create_file_session_manager(
+    session_manager = FileSessionManager(
         session_id="test-agent-session",
         storage_dir=temp_session_dir,
     )
@@ -66,7 +65,7 @@ def test_session_persistence_state(temp_session_dir):
     session_id = "state-persistence-test"
 
     # Create agent with initial state
-    session_manager1 = create_file_session_manager(
+    session_manager1 = FileSessionManager(
         session_id=session_id,
         storage_dir=temp_session_dir,
     )
@@ -83,7 +82,7 @@ def test_session_persistence_state(temp_session_dir):
 
     # Create second agent with same session and no initial state
     # It should load the session from storage (which has the initial state from agent1)
-    session_manager2 = create_file_session_manager(
+    session_manager2 = FileSessionManager(
         session_id=session_id,
         storage_dir=temp_session_dir,
     )
@@ -103,7 +102,7 @@ def test_session_storage_path(temp_session_dir):
     Test getting session storage path.
     """
     session_id = "path-test-session"
-    session_path = get_session_storage_path(session_id, temp_session_dir)
+    session_path = Path(temp_session_dir) / f"session_{session_id}"
 
     assert session_path is not None
     assert isinstance(session_path, Path)
@@ -115,7 +114,7 @@ def test_multiple_sessions(temp_session_dir):
     Test creating multiple independent sessions.
     """
     # Create first session
-    session1 = create_file_session_manager(
+    session1 = FileSessionManager(
         session_id="session-1",
         storage_dir=temp_session_dir,
     )
@@ -127,7 +126,7 @@ def test_multiple_sessions(temp_session_dir):
     agent1.state.set("value", "first")
 
     # Create second session
-    session2 = create_file_session_manager(
+    session2 = FileSessionManager(
         session_id="session-2",
         storage_dir=temp_session_dir,
     )
@@ -152,7 +151,7 @@ def test_session_with_todos(temp_session_dir):
     session_id = "todos-test-session"
 
     # Create first agent and set todos
-    session_manager1 = create_file_session_manager(
+    session_manager1 = FileSessionManager(
         session_id=session_id,
         storage_dir=temp_session_dir,
     )
@@ -174,7 +173,7 @@ def test_session_with_todos(temp_session_dir):
     assert todos1[0]["content"] == "Task 1"
 
     # Create second agent with same session
-    session_manager2 = create_file_session_manager(
+    session_manager2 = FileSessionManager(
         session_id=session_id,
         storage_dir=temp_session_dir,
     )

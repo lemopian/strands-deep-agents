@@ -25,7 +25,7 @@ def example_basic_session_persistence():
     print("=" * 70)
     print()
 
-    session_id = f"pierreange-{date.today().isoformat()}"
+    session_id = f"example-{date.today().isoformat()}"
     storage_dir = "./.agent_sessions"
 
     # Create session manager
@@ -84,7 +84,7 @@ def example_failure_recovery():
     print("=" * 70)
     print()
 
-    session_id = "pa-task-session"
+    session_id = "example-task-session"
     storage_dir = "./.agent_sessions"
 
     # Create session manager
@@ -156,7 +156,7 @@ def example_state_persistence():
     print("=" * 70)
     print()
 
-    session_id = "pa-state-session"
+    session_id = "example-state-session"
     storage_dir = "./.agent_sessions"
 
     # Create agent with initial state

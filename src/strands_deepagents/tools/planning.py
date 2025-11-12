@@ -6,7 +6,8 @@ import logging
 import traceback
 
 from pydantic import BaseModel, Field
-from strands import tool, ToolContext
+from strands import ToolContext, tool
+
 from strands_deepagents.prompts import WRITE_TODOS_TOOL_DESCRIPTION
 from strands_deepagents.state import TodoStatus
 

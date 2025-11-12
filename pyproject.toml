@@ -57,6 +57,8 @@ dev = [
     "black>=23.0.0",
     "ruff>=0.1.0",
     "mypy>=1.0.0",
+    "pre-commit>=3.6.0",
+    "isort>=5.13.0",
 ]
 
 [tool.black]
@@ -75,5 +77,8 @@ disallow_untyped_defs = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-asyncio_mode = "auto"
 
+[tool.isort]
+profile = "black"
+line_length = 100
+skip_gitignore = true

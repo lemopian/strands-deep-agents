@@ -2,9 +2,9 @@
 Tests for the factory functions.
 """
 
-import pytest
-from strands_deepagents import create_deep_agent
 from strands import Agent, tool
+
+from strands_deepagents import create_deep_agent
 
 
 class TestCreateDeepAgent:
@@ -76,14 +76,9 @@ class TestCreateDeepAgent:
     def test_agent_with_complex_initial_state(self):
         """Test agent with complex initial state."""
         complex_state = {
-            "todos": [
-                {"id": "1", "content": "Complex task", "status": "pending"}
-            ],
-            "metadata": {
-                "version": "1.0",
-                "author": "test"
-            },
-            "counters": [1, 2, 3, 4, 5]
+            "todos": [{"id": "1", "content": "Complex task", "status": "pending"}],
+            "metadata": {"version": "1.0", "author": "test"},
+            "counters": [1, 2, 3, 4, 5],
         }
 
         agent = create_deep_agent(initial_state=complex_state)
@@ -102,6 +97,7 @@ class TestCreateDeepAgent:
 
     def test_multiple_custom_tools(self):
         """Test adding multiple custom tools."""
+
         @tool
         def tool1(x: str) -> str:
             """Tool 1."""
@@ -125,16 +121,8 @@ class TestCreateDeepAgent:
 
     def test_multiple_sub_agents(self):
         """Test adding multiple sub-agents."""
-        sub_agent1 = {
-            "name": "agent1",
-            "description": "First agent",
-            "prompt": "Instructions 1"
-        }
-        sub_agent2 = {
-            "name": "agent2",
-            "description": "Second agent",
-            "prompt": "Instructions 2"
-        }
+        sub_agent1 = {"name": "agent1", "description": "First agent", "prompt": "Instructions 1"}
+        sub_agent2 = {"name": "agent2", "description": "Second agent", "prompt": "Instructions 2"}
 
         agent = create_deep_agent(subagents=[sub_agent1, sub_agent2])
 
@@ -176,7 +164,7 @@ class TestSubAgentTypeDict:
         sub_agent = {
             "name": "test_agent",
             "description": "Test description",
-            "prompt": "Test instructions"
+            "prompt": "Test instructions",
         }
 
         assert sub_agent["name"] == "test_agent"
@@ -196,6 +184,7 @@ class TestSubAgentTypeDict:
 
     def test_sub_agent_with_multiple_tools(self):
         """Test SubAgent with multiple tools."""
+
         @tool
         def tool1(x: int) -> int:
             """Tool 1."""
@@ -232,7 +221,7 @@ class TestSubAgentTypeDict:
         sub_agent = {
             "name": "dict_agent",
             "description": "Dict test",
-            "prompt": "Dict instructions"
+            "prompt": "Dict instructions",
         }
 
         # Test dict access
@@ -243,22 +232,14 @@ class TestSubAgentTypeDict:
 
     def test_sub_agent_with_empty_name(self):
         """Test SubAgent with empty name."""
-        sub_agent = {
-            "name": "",
-            "description": "Empty name",
-            "prompt": "Instructions"
-        }
+        sub_agent = {"name": "", "description": "Empty name", "prompt": "Instructions"}
 
         assert sub_agent["name"] == ""
 
     def test_sub_agent_with_long_description(self):
         """Test SubAgent with very long description."""
         long_desc = "A" * 1000
-        sub_agent = {
-            "name": "long_desc_agent",
-            "description": long_desc,
-            "prompt": "Instructions"
-        }
+        sub_agent = {"name": "long_desc_agent", "description": long_desc, "prompt": "Instructions"}
 
         assert len(sub_agent["description"]) == 1000
 
@@ -269,7 +250,7 @@ class TestFactoryIntegration:
     def test_full_agent_with_everything(self, sample_tool, sample_sub_agent, sample_todos):
         """Test creating agent with all features enabled."""
         initial_state = {"todos": sample_todos}
-        
+
         agent = create_deep_agent(
             instructions="You are a comprehensive agent.",
             tools=[sample_tool],
@@ -278,7 +259,7 @@ class TestFactoryIntegration:
         )
 
         assert isinstance(agent, Agent)
-        
+
         todos = agent.state.get("todos")
         assert len(todos) == 3
 
@@ -292,7 +273,7 @@ class TestFactoryIntegration:
 
         # Set state
         agent.state.set("todos", sample_todos)
-        
+
         # Verify
         updated_todos = agent.state.get("todos")
         assert len(updated_todos) == 3
@@ -300,17 +281,21 @@ class TestFactoryIntegration:
 
     def test_agent_with_write_todos_tool(self, agent_with_planning):
         """Test that agent can use write_todos tool."""
+        from strands import ToolContext
+
         from strands_deepagents.tools import TodoItem, write_todos
-        from strands.tools import ToolContext
-        
-        tool_context = ToolContext(agent=agent_with_planning, tool=write_todos, arguments={})
-        
+
+        tool_use = {"toolUseId": "test-11", "name": "write_todos", "input": {}}
+        tool_context = ToolContext(
+            tool_use=tool_use, agent=agent_with_planning, invocation_state={}
+        )
+
         result = write_todos(
             todos=[TodoItem(id="1", content="Test", status="pending")],
             tool_context=tool_context,
-            merge=False
+            merge=False,
         )
-        
+
         assert "TODO list updated" in result
         todos = agent_with_planning.state.get("todos")
         assert len(todos) == 1
@@ -320,7 +305,7 @@ class TestFactoryIntegration:
         # Parallel (default)
         agent_parallel = create_deep_agent(disable_parallel_tool_calling=False)
         assert isinstance(agent_parallel, Agent)
-        
+
         # Sequential
         agent_sequential = create_deep_agent(disable_parallel_tool_calling=True)
         assert isinstance(agent_sequential, Agent)
@@ -328,7 +313,7 @@ class TestFactoryIntegration:
     def test_model_parameter_usage(self, default_model):
         """Test that model parameter is accepted and used."""
         agent = create_deep_agent(model=default_model)
-        
+
         assert isinstance(agent, Agent)
         # Model is set internally
 
@@ -359,6 +344,7 @@ class TestFactoryEdgeCases:
 
     def test_mixed_tool_types(self, sample_tool):
         """Test adding both function tools and tool objects."""
+
         @tool
         def another_tool(x: str) -> str:
             """Another tool."""
@@ -370,6 +356,7 @@ class TestFactoryEdgeCases:
 
     def test_subagent_with_optional_fields(self):
         """Test subagent configuration with all optional fields."""
+
         @tool
         def custom_tool(x: int) -> int:
             """Custom tool for subagent."""
@@ -380,7 +367,7 @@ class TestFactoryEdgeCases:
             "description": "Fully configured agent",
             "prompt": "Full instructions",
             "tools": [custom_tool],
-            "model": "anthropic.claude-3-5-haiku-20241022"
+            "model": "anthropic.claude-3-5-haiku-20241022",
         }
 
         agent = create_deep_agent(subagents=[sub_agent])
@@ -389,11 +376,7 @@ class TestFactoryEdgeCases:
 
     def test_state_with_none_values(self):
         """Test initial state with None values."""
-        initial_state = {
-            "key1": None,
-            "key2": "value2",
-            "todos": []
-        }
+        initial_state = {"key1": None, "key2": "value2", "todos": []}
 
         agent = create_deep_agent(initial_state=initial_state)
 

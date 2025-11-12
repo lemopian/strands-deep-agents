@@ -99,7 +99,7 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
         tools=[file_read, file_write],  # No tools needed - just text processing
     )
     # Disable session persistence to avoid massive context accumulation
-    session_id = "pa-task-session"
+    session_id = "example-task-session"
     storage_dir = "./.agent_sessions"
     session_manager = FileSessionManager(
         session_id=session_id,

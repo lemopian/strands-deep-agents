@@ -3,9 +3,10 @@ Type definitions for Strands DeepAgents using TypedDict pattern.
 """
 
 from typing import Any, NotRequired
-from typing_extensions import TypedDict
-from strands.models import Model
+
 from strands import Agent
+from strands.models import Model
+from typing_extensions import TypedDict
 
 
 class SubAgent(TypedDict):

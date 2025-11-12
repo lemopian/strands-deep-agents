@@ -2,9 +2,9 @@
 State definitions for Strands DeepAgents.
 """
 
-from typing import NotRequired, Literal, Annotated, TypedDict
-from typing_extensions import TypedDict as TypedDictExt
+from typing import Annotated, Literal, NotRequired, TypedDict
 
+from typing_extensions import TypedDict as TypedDictExt
 
 TodoStatus = Literal["pending", "in_progress", "completed"]
 

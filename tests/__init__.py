@@ -1,3 +1,3 @@
 """
-Tests for Strands DeepAgents.
+Tests package for the Hello World project.
 """

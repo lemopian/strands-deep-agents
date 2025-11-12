@@ -3,11 +3,13 @@ Sub-agent implementation using the Agents-as-Tools pattern from Strands.
 """
 
 import logging
-from typing import List, Any, Union, Dict
+from typing import Any, Dict, List, Union
+
 from strands import Agent, tool
 from strands.tools.executors import SequentialToolExecutor
-from strands_deepagents.types import SubAgent, CustomSubAgent
-from strands_deepagents.prompts import TASK_TOOL_DESCRIPTION, BASE_AGENT_PROMPT
+
+from strands_deepagents.prompts import BASE_AGENT_PROMPT, TASK_TOOL_DESCRIPTION
+from strands_deepagents.types import CustomSubAgent, SubAgent
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(

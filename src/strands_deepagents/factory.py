@@ -6,20 +6,19 @@ and sub-agent delegation capabilities, adapted from the LangChain DeepAgents pat
 to work with the Strands Agents SDK architecture.
 """
 
-from typing import List, Optional, Any, Dict, Sequence, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+
 from strands import Agent
 from strands.models import Model
-from strands.tools.executors import SequentialToolExecutor
 from strands.session.session_manager import SessionManager
-from strands_deepagents.types import SubAgent, CustomSubAgent
-from strands_tools import file_read, file_write, editor
-from strands_deepagents.tools.planning import write_todos
-from strands_deepagents.sub_agents import (
-    create_task_tool,
-    create_async_task_tool,
-)
-from strands_deepagents.prompts import get_deep_agent_prompt
+from strands.tools.executors import SequentialToolExecutor
+from strands_tools import editor, file_read, file_write
+
 from strands_deepagents.ai_models import get_default_model
+from strands_deepagents.prompts import get_deep_agent_prompt
+from strands_deepagents.sub_agents import create_async_task_tool, create_task_tool
+from strands_deepagents.tools.planning import write_todos
+from strands_deepagents.types import CustomSubAgent, SubAgent
 
 
 def create_deep_agent(

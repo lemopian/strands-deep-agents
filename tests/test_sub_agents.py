@@ -2,15 +2,17 @@
 Tests for sub-agent functionality.
 """
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
-from strands import Agent, tool
+from strands import tool
+
 from strands_deepagents.sub_agents import (
-    create_task_tool,
+    _build_subagents_configs,
+    _get_subagents_description,
     create_async_task_tool,
     create_general_purpose_sub_agent,
-    _get_subagents_description,
-    _build_subagents_configs,
+    create_task_tool,
 )
 
 
@@ -74,9 +76,7 @@ class TestSubAgentCreation:
         tools = []
 
         general_agent = create_general_purpose_sub_agent(
-            main_instructions=instructions,
-            all_tools=tools,
-            model=default_model
+            main_instructions=instructions, all_tools=tools, model=default_model
         )
 
         assert general_agent["name"] == "general-purpose"
@@ -87,9 +87,7 @@ class TestSubAgentCreation:
     def test_general_purpose_sub_agent_with_empty_instructions(self, default_model):
         """Test general purpose agent with empty instructions."""
         general_agent = create_general_purpose_sub_agent(
-            main_instructions="",
-            all_tools=[],
-            model=default_model
+            main_instructions="", all_tools=[], model=default_model
         )
 
         assert general_agent["name"] == "general-purpose"
@@ -98,11 +96,9 @@ class TestSubAgentCreation:
     def test_general_purpose_sub_agent_inherits_tools(self, default_model, sample_tool):
         """Test that general purpose agent inherits all tools."""
         tools = [sample_tool]
-        
+
         general_agent = create_general_purpose_sub_agent(
-            main_instructions="Main instructions",
-            all_tools=tools,
-            model=default_model
+            main_instructions="Main instructions", all_tools=tools, model=default_model
         )
 
         assert general_agent["tools"] == tools
@@ -115,7 +111,7 @@ class TestSubAgentConfiguration:
         """Test description generation for single subagent."""
         subagents = [{"name": "test", "description": "Test agent"}]
         desc = _get_subagents_description(subagents)
-        
+
         assert "test" in desc
         assert "Test agent" in desc
 
@@ -126,7 +122,7 @@ class TestSubAgentConfiguration:
             {"name": "agent2", "description": "Second agent"},
         ]
         desc = _get_subagents_description(subagents)
-        
+
         assert "agent1" in desc
         assert "agent2" in desc
         assert "First agent" in desc
@@ -143,7 +139,7 @@ class TestSubAgentConfiguration:
             {"name": "agent1", "prompt": "Prompt 1"},
             {"name": "agent2", "prompt": "Prompt 2", "tools": [sample_tool]},
         ]
-        
+
         configs = _build_subagents_configs(
             default_tools=[],
             subagents=subagents,
@@ -158,10 +154,8 @@ class TestSubAgentConfiguration:
     def test_build_subagents_configs_with_model_override(self, default_model):
         """Test that subagent can override default model."""
         custom_model = "anthropic.claude-3-5-haiku-20241022"
-        subagents = [
-            {"name": "fast_agent", "prompt": "Be fast", "model": custom_model}
-        ]
-        
+        subagents = [{"name": "fast_agent", "prompt": "Be fast", "model": custom_model}]
+
         configs = _build_subagents_configs(
             default_tools=[],
             subagents=subagents,
@@ -176,10 +170,10 @@ class TestSubAgentConfiguration:
             {
                 "name": "sequential_agent",
                 "prompt": "Sequential",
-                "disable_parallel_tool_calling": True
+                "disable_parallel_tool_calling": True,
             }
         ]
-        
+
         configs = _build_subagents_configs(
             default_tools=[],
             subagents=subagents,
@@ -195,7 +189,7 @@ class TestSubAgentExecution:
     def test_task_tool_invalid_subagent_type(self, default_model):
         """Test error handling when invalid subagent type is specified."""
         sub_agent_config = {"name": "valid_agent", "description": "Valid", "prompt": "Valid"}
-        
+
         tool_func = create_task_tool(
             default_tools=[],
             subagents=[sub_agent_config],
@@ -203,24 +197,20 @@ class TestSubAgentExecution:
         )
 
         result = tool_func(description="Test task", subagent_type="invalid_agent")
-        
+
         assert "Error" in result
         assert "invalid_agent" in result
         assert "valid_agent" in result
 
-    @patch('strands_deepagents.sub_agents.Agent')
+    @patch("strands_deepagents.sub_agents.Agent")
     def test_task_tool_execution_success(self, mock_agent_class, default_model):
         """Test successful task tool execution."""
         mock_agent_instance = Mock()
         mock_agent_instance.return_value = "Task completed successfully"
         mock_agent_class.return_value = mock_agent_instance
-        
-        sub_agent_config = {
-            "name": "test_agent",
-            "description": "Test",
-            "prompt": "Test prompt"
-        }
-        
+
+        sub_agent_config = {"name": "test_agent", "description": "Test", "prompt": "Test prompt"}
+
         tool_func = create_task_tool(
             default_tools=[],
             subagents=[sub_agent_config],
@@ -228,24 +218,20 @@ class TestSubAgentExecution:
         )
 
         result = tool_func(description="Test task", subagent_type="test_agent")
-        
+
         assert "Task completed successfully" in result
         mock_agent_class.assert_called_once()
         mock_agent_instance.assert_called_once_with("Test task")
 
-    @patch('strands_deepagents.sub_agents.Agent')
+    @patch("strands_deepagents.sub_agents.Agent")
     def test_task_tool_execution_exception(self, mock_agent_class, default_model):
         """Test exception handling during task execution."""
         mock_agent_instance = Mock()
         mock_agent_instance.side_effect = Exception("Test error")
         mock_agent_class.return_value = mock_agent_instance
-        
-        sub_agent_config = {
-            "name": "error_agent",
-            "description": "Error",
-            "prompt": "Error prompt"
-        }
-        
+
+        sub_agent_config = {"name": "error_agent", "description": "Error", "prompt": "Error prompt"}
+
         tool_func = create_task_tool(
             default_tools=[],
             subagents=[sub_agent_config],
@@ -253,25 +239,26 @@ class TestSubAgentExecution:
         )
 
         result = tool_func(description="Test task", subagent_type="error_agent")
-        
+
         assert "Error" in result
         assert "error_agent" in result
         assert "Test error" in result
 
     def test_task_tool_with_subagent_tools(self, default_model):
         """Test that subagent receives its configured tools."""
+
         @tool
         def special_tool(x: int) -> int:
             """Special tool."""
             return x * 2
-        
+
         sub_agent_config = {
             "name": "tool_agent",
             "description": "Has tools",
             "prompt": "Use tools",
-            "tools": [special_tool]
+            "tools": [special_tool],
         }
-        
+
         tool_func = create_task_tool(
             default_tools=[],
             subagents=[sub_agent_config],
@@ -285,7 +272,7 @@ class TestSubAgentExecution:
 class TestAsyncSubAgentCreation:
     """Test suite for async sub-agent functionality."""
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_create_async_task_tool_basic(self, default_model):
         """Test creating a basic async task tool."""
         sub_agent_config = {
@@ -303,15 +290,11 @@ class TestAsyncSubAgentCreation:
         assert tool_func.__name__ == "task"
         assert callable(tool_func)
 
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_async_task_tool_invalid_subagent(self, default_model):
         """Test async task tool with invalid subagent type."""
-        sub_agent_config = {
-            "name": "valid_async",
-            "description": "Valid",
-            "prompt": "Valid"
-        }
-        
+        sub_agent_config = {"name": "valid_async", "description": "Valid", "prompt": "Valid"}
+
         tool_func = await create_async_task_tool(
             default_tools=[],
             subagents=[sub_agent_config],
@@ -319,12 +302,12 @@ class TestAsyncSubAgentCreation:
         )
 
         result = await tool_func(description="Test", subagent_type="invalid_async")
-        
+
         assert "Error" in result
         assert "invalid_async" in result
 
-    @pytest.mark.asyncio
-    @patch('strands_deepagents.sub_agents.Agent')
+    @pytest.mark.anyio
+    @patch("strands_deepagents.sub_agents.Agent")
     async def test_async_task_tool_execution(self, mock_agent_class, default_model):
         """Test async task tool execution."""
         mock_agent_instance = Mock()
@@ -332,13 +315,13 @@ class TestAsyncSubAgentCreation:
         async_result = AsyncMock(return_value="Async result")
         mock_agent_instance.invoke_async = async_result
         mock_agent_class.return_value = mock_agent_instance
-        
+
         sub_agent_config = {
             "name": "async_test",
             "description": "Async test",
-            "prompt": "Async prompt"
+            "prompt": "Async prompt",
         }
-        
+
         tool_func = await create_async_task_tool(
             default_tools=[],
             subagents=[sub_agent_config],
@@ -346,7 +329,7 @@ class TestAsyncSubAgentCreation:
         )
 
         result = await tool_func(description="Async task", subagent_type="async_test")
-        
+
         assert "Async result" in result
 
 
@@ -358,7 +341,7 @@ class TestSubAgentTypes:
         agent = {
             "name": "minimal",
             "description": "Minimal agent",
-            "prompt": "Minimal instructions"
+            "prompt": "Minimal instructions",
         }
 
         assert agent["name"] == "minimal"
@@ -372,7 +355,7 @@ class TestSubAgentTypes:
             "description": "Full agent",
             "prompt": "Full instructions",
             "tools": [sample_tool],
-            "model": "anthropic.claude-3-5-haiku-20241022"
+            "model": "anthropic.claude-3-5-haiku-20241022",
         }
 
         assert agent["name"] == "full"
@@ -382,11 +365,7 @@ class TestSubAgentTypes:
 
     def test_subagent_dict_access(self):
         """Test that SubAgent dict can be accessed as dict."""
-        agent = {
-            "name": "dict_test",
-            "description": "Dict test",
-            "prompt": "Instructions"
-        }
+        agent = {"name": "dict_test", "description": "Dict test", "prompt": "Instructions"}
 
         # SubAgent is a dict
         assert agent["name"] == "dict_test"
@@ -423,7 +402,7 @@ class TestSubAgentIntegration:
         pass
 
     @pytest.mark.skip(reason="Requires actual model API access")
-    @pytest.mark.asyncio
+    @pytest.mark.anyio
     async def test_async_sub_agent_execution_with_real_model(self):
         """Test async sub-agent execution with real API (requires credentials)."""
         pass
@@ -438,7 +417,7 @@ class TestSubAgentEdgeCases:
         sub_agent_config = {
             "name": "long_prompt_agent",
             "description": "Has long prompt",
-            "prompt": long_prompt
+            "prompt": long_prompt,
         }
 
         tool_func = create_task_tool(
@@ -454,7 +433,7 @@ class TestSubAgentEdgeCases:
         sub_agent_config = {
             "name": "special_agent",
             "description": "Has <>&\"' special chars",
-            "prompt": "Prompt with 测试 unicode"
+            "prompt": "Prompt with 测试 unicode",
         }
 
         tool_func = create_task_tool(
@@ -467,11 +446,7 @@ class TestSubAgentEdgeCases:
 
     def test_subagent_with_empty_name(self, default_model):
         """Test handling of subagent with empty name."""
-        sub_agent_config = {
-            "name": "",
-            "description": "Empty name agent",
-            "prompt": "Prompt"
-        }
+        sub_agent_config = {"name": "", "description": "Empty name agent", "prompt": "Prompt"}
 
         tool_func = create_task_tool(
             default_tools=[],
@@ -500,7 +475,7 @@ class TestSubAgentEdgeCases:
         ]
 
         desc = _get_subagents_description(subagents)
-        
+
         assert "agent1" in desc
         assert "agent2" in desc
         # Description includes original formatting

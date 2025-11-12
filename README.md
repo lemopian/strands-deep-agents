@@ -1,27 +1,30 @@
-# Strands DeepAgents
+# Strands Deep Agents
 
-Create planning-capable AI agents with sub-agent delegation and file system operations, built on the [Strands Agents SDK](https://github.com/strands-ai/strands-agents).
+Build sophisticated AI agent systems with planning, sub-agent delegation, and multi-step workflows. Built on the [Strands Agents SDK](https://github.com/strands-ai/strands-agents).
 
-## What is DeepAgents?
+## What is Deep Agents?
 
-![DeepAgents Overview](./docs/img/deep-agent-overview.png)
+![Deep Agents Overview](https://raw.githubusercontent.com/lemopian/strands-deep-agents/main/docs/img/deep-agent-overview.png)
 
-DeepAgents enables AI agents to handle complex, multi-step tasks by combining:
-- 🧠 **Planning** - Break tasks into TODO lists
-- 📁 **File Operations** - Read, write, and edit files
-- 🤝 **Sub-agent Delegation** - Specialized agents for specific tasks
+Deep Agents enables AI systems to handle complex, multi-step tasks through:
+- 🧠 **Strategic Planning** - Break down complex tasks into actionable TODOs
+- 🤝 **Sub-agent Orchestration** - Delegate specialized tasks to focused agents
+- 📁 **Context Management** - Efficient file-based operations to keep context lean
 - 💾 **Session Persistence** - Resume work across sessions
+- 🔬 **Research & Analysis** - Multi-perspective investigation and synthesis
+
+**Featured Example**: [DeepSearch](#deepsearch-advanced-research-agent) - A production-ready research agent demonstrating sub-agent orchestration, parallel research, and intelligent synthesis.
 
 Check the related [article](http://pierreange.ai/blog/deep-agents-using-strands) for more details.
 
 ## Installation
 
 ```bash
-# Using UV (recommended)
-uv pip install strands-deepagents
+# Using UV
+uv add strands-deep-agents
 
 # Using pip
-pip install strands-deepagents
+pip install strands-deep-agents
 ```
 
 **Requirements:** Python >= 3.12
@@ -63,343 +66,228 @@ Output:
 [completed] Add docstrings and examples
 ```
 
-## Usage Patterns
+## DeepSearch: Advanced Research Agent
 
-### 1. File Operations
+DeepSearch demonstrates the full power of Deep Agents through a production-ready research agent system with intelligent orchestration and parallel research capabilities.
 
-The agent has built-in file tools:
+For this example, we can use any internet search tool, for example [Linkup] (https://app.linkup.so/) or tavily tool for web search.
 
-```python
-agent = create_deep_agent(
-    instructions="You are a code reviewer."
-)
+### Architecture
 
-# Agent can read files
-result = agent("Review the code in calculator.py and suggest improvements")
+DeepSearch uses a **three-tier agent architecture**:
 
-# Agent can write files
-result = agent("Create a requirements.txt file with necessary dependencies")
+1. **Research Lead Agent** - Strategic planning, task decomposition, and synthesis
+2. **Research Sub-agents** - Parallel, focused investigation on specific topics
+3. **Citations Agent** - Post-processing to add proper source references
 
-# Agent can edit files
-result = agent("Add type hints to all functions in calculator.py")
+### Key Features
+
+- **Intelligent Task Decomposition**: Analyzes queries as depth-first (multiple perspectives) or breadth-first (independent sub-questions)
+- **Parallel Research**: Deploys multiple sub-agents simultaneously for efficient information gathering
+- **Context Management**: Sub-agents write findings to files, keeping context lean
+- **Source Citation**: Automated citation agent adds proper references to final reports
+- **Session Persistence**: Resume research across sessions
+
+### Running DeepSearch
+
+```bash
+cd examples/deepsearch
+
+# Basic usage with default prompt
+python agent.py
+
+# Custom research prompt
+python agent.py -p "Research the impact of AI on healthcare in 2025"
 ```
 
-### 2. Sub-agent Delegation
-
-Create specialized sub-agents for specific tasks:
+### DeepSearch Implementation
 
 ```python
-# Define specialized sub-agents
+from strands_deep_agents import create_deep_agent, SubAgent
+from strands_tools import tavily, file_read, file_write
+
+# Research sub-agent - performs focused investigations
+research_subagent = SubAgent(
+    name="research_subagent",
+    description=(
+        "Specialized research agent for focused investigations. "
+        "Researches specific questions, gathers facts, analyzes sources. "
+        "Has access to web search. Writes findings to files."
+    ),
+    tools=[tavily, file_write],
+    prompt="You are a thorough researcher. Gather comprehensive, accurate information..."
+)
+
+# Citations agent - adds source references
+citations_agent = SubAgent(
+    name="citations_agent",
+    description="Adds proper citations to research reports.",
+    tools=[file_read, file_write],
+    prompt="Add citations to research text using provided sources..."
+)
+
+# Create the research lead agent
+agent = create_deep_agent(
+    instructions="""
+    You are an expert research lead. Your role:
+    1. Analyze the research question
+    2. Create a research plan
+    3. Deploy research sub-agents for focused investigations
+    4. Synthesize findings into a comprehensive report
+    5. Call citations agent to add references
+    """,
+    subagents=[research_subagent, citations_agent],
+    tools=[file_read, file_write]
+)
+
+# Execute research
+result = agent("""
+Research AI safety in 2025:
+1. Main challenges and concerns
+2. Leading organizations and initiatives
+Create a comprehensive report with executive summary.
+""")
+```
+
+### How DeepSearch Works
+
+1. **Planning Phase**: Lead agent analyzes the query and creates a research plan
+2. **Parallel Research**: Multiple research sub-agents investigate different aspects simultaneously
+3. **File-Based Context**: Sub-agents write findings to `./research_findings_*.md` files
+4. **Synthesis**: Lead agent reads all findings and synthesizes a comprehensive report
+5. **Citations**: Citations agent adds proper source references to the final report
+
+### Example Output Structure
+
+```
+Research findings written to: research_findings_1.md, research_findings_2.md, ...
+Final report: ai_safety_2025_report.md
+
+TODOs:
+✅ Analyze research question and create plan
+✅ Deploy subagent: AI safety challenges
+✅ Deploy subagent: Leading organizations
+✅ Deploy subagent: Recent initiatives
+✅ Synthesize findings into report
+✅ Add citations to report
+```
+
+## Core Patterns
+
+### Sub-agent Delegation
+
+Deep Agents excel at delegating specialized tasks:
+
+```python
+from strands_deep_agents import create_deep_agent
+
 subagents = [
     {
-        "name": "code_reviewer",
-        "description": "Expert at reviewing code for quality and best practices",
-        "prompt": "You are a senior code reviewer. Focus on readability, performance, and security."
+        "name": "researcher",
+        "description": "Conducts focused research on specific topics",
+        "prompt": "You are a thorough researcher. Gather comprehensive information."
     },
     {
-        "name": "test_writer",
-        "description": "Creates comprehensive unit tests with edge cases",
-        "prompt": "You are a testing expert. Write thorough pytest tests with fixtures and parametrization."
-    },
-    {
-        "name": "doc_writer",
-        "description": "Writes clear documentation and docstrings",
-        "prompt": "You are a technical writer. Create clear, concise documentation."
+        "name": "analyst",
+        "description": "Analyzes data and identifies patterns",
+        "prompt": "You are a data analyst. Find insights and patterns."
     }
 ]
 
 agent = create_deep_agent(
-    instructions="You are a senior software developer.",
+    instructions="You are a research coordinator.",
     subagents=subagents
 )
-
-# The main agent will delegate to sub-agents automatically
-result = agent("""
-Create a user authentication module with:
-1. Login and logout functions
-2. Unit tests
-3. Full documentation
-
-Use sub-agents where appropriate.
-""")
 ```
 
-The main agent will:
-- Create the authentication module
-- Call `test_writer` sub-agent to generate tests
-- Call `doc_writer` sub-agent for documentation
-- Call `code_reviewer` sub-agent to review everything
+### Session Persistence
 
-### 3. Session Persistence
-
-Save and restore agent state across sessions:
+Resume work across sessions:
 
 ```python
-from strands_deep_agents import create_deep_agent
 from strands.session.file_session_manager import FileSessionManager
 
-# First session - start a project
 session_manager = FileSessionManager(
     session_id="project-xyz",
     storage_dir="./sessions"
 )
 
 agent = create_deep_agent(
-    instructions="You are a full-stack developer.",
+    instructions="You are a research assistant.",
     session_manager=session_manager
 )
 
-agent("Start building a REST API for a todo app")
-# Agent creates files, plans tasks...
+# First session
+agent("Start researching quantum computing")
 
-# Later - resume the same project
-session_manager = FileSessionManager(
-    session_id="project-xyz",  # Same ID
-    storage_dir="./sessions"
-)
-
-agent = create_deep_agent(
-    instructions="You are a full-stack developer.",
-    session_manager=session_manager
-)
-
-# Conversation history and TODOs are restored
-agent("Continue where we left off. Add authentication to the API")
+# Later - conversation history and TODOs restored
+agent("Continue where we left off")
 ```
 
-#### S3 Session Storage
+### Custom Tools
 
-For cloud-based persistence:
-
-```python
-from strands.session.s3_session_manager import S3SessionManager
-
-session_manager = S3SessionManager(
-    session_id="user-123",
-    bucket_name="my-agent-sessions",
-    prefix="agents/"
-)
-
-agent = create_deep_agent(
-    instructions="You are a helpful assistant.",
-    session_manager=session_manager
-)
-```
-
-### 4. Async Operations
-
-For parallel execution and better performance:
-
-```python
-import asyncio
-from strands_deep_agents import async_create_deep_agent
-
-async def main():
-    agent = await async_create_deep_agent(
-        instructions="You are a data analyst.",
-        model="global.anthropic.claude-sonnet-4-5-20250929-v1:0"
-    )
-
-    result = await agent.invoke_async(
-        "Analyze the CSV files in ./data and create a summary report"
-    )
-    print(result)
-
-asyncio.run(main())
-```
-
-### 5. Custom Tools
-
-Add your own tools to the agent:
+Extend agents with your own tools:
 
 ```python
 from strands import tool
 
 @tool
-def fetch_weather(city: str) -> str:
-    """Get current weather for a city."""
+def web_search(query: str) -> str:
+    """Search the web for information."""
     # Your implementation
-    return f"Weather in {city}: Sunny, 72°F"
-
-@tool
-def send_email(to: str, subject: str, body: str) -> str:
-    """Send an email."""
-    # Your implementation
-    return f"Email sent to {to}"
+    return search_results
 
 agent = create_deep_agent(
-    instructions="You are a personal assistant.",
-    tools=[fetch_weather, send_email]
+    instructions="You are a research assistant.",
+    tools=[web_search]
 )
-
-result = agent("Check weather in San Francisco and email me a summary")
-```
-
-### 6. Sequential Execution
-
-Force sequential tool execution (useful for debugging):
-
-```python
-agent = create_deep_agent(
-    instructions="You are a helpful assistant.",
-    disable_parallel_tool_calling=True  # Tools execute one at a time
-)
-
-result = agent("Create three files: config.py, main.py, and utils.py")
-# Files will be created sequentially instead of in parallel
-```
-
-### 7. Multi-step Workflows
-
-Agents excel at complex, multi-step tasks:
-
-```python
-agent = create_deep_agent(
-    instructions="You are a Python package developer.",
-    subagents=[
-        {
-            "name": "architect",
-            "description": "Designs project structure and architecture",
-            "prompt": "You are a software architect. Design clean, scalable structures."
-        },
-        {
-            "name": "implementer",
-            "description": "Implements code based on specifications",
-            "prompt": "You are a senior developer. Write clean, efficient code."
-        },
-        {
-            "name": "tester",
-            "description": "Creates comprehensive tests",
-            "prompt": "You are a QA engineer. Write thorough tests."
-        }
-    ]
-)
-
-result = agent("""
-Create a Python package called 'api_client' with:
-- Modular structure (src/ layout)
-- HTTP client with retry logic
-- Error handling
-- Comprehensive tests
-- README with examples
-- pyproject.toml configuration
-
-Plan this properly and delegate to sub-agents where appropriate.
-""")
-```
-
-## Common Use Cases
-
-### Code Development
-
-```python
-agent = create_deep_agent(
-    instructions="You are an expert Python developer.",
-    subagents=[
-        {
-            "name": "code_reviewer",
-            "description": "Reviews code quality",
-            "prompt": "Review for readability, performance, and best practices."
-        }
-    ]
-)
-
-# The agent can handle the full development lifecycle
-result = agent("Create a Flask REST API with CRUD operations for a blog")
-```
-
-### Research & Documentation
-
-```python
-agent = create_deep_agent(
-    instructions="You are a technical researcher and writer.",
-    tools=[web_search_tool]  # Add your search tool
-)
-
-result = agent("""
-Research best practices for FastAPI deployment and create a
-comprehensive guide with examples.
-""")
-```
-
-### Refactoring
-
-```python
-agent = create_deep_agent(
-    instructions="You are a refactoring expert."
-)
-
-result = agent("""
-Refactor the legacy code in ./src:
-1. Add type hints
-2. Break up large functions
-3. Improve naming
-4. Add docstrings
-5. Create tests
-""")
-```
-
-### Data Processing
-
-```python
-agent = create_deep_agent(
-    instructions="You are a data engineer."
-)
-
-result = agent("""
-Process the CSV files in ./data:
-1. Clean and validate data
-2. Transform to normalized format
-3. Generate summary statistics
-4. Create visualization script
-5. Export to JSON
-""")
 ```
 
 ## API Reference
 
 ### `create_deep_agent()`
 
-Create a synchronous deep agent.
+Create a deep agent with planning and sub-agent capabilities.
 
 ```python
+from strands_deep_agents import create_deep_agent
+
 agent = create_deep_agent(
-    tools=None,                           # Additional custom tools
-    instructions="",                      # System instructions
-    model=None,                          # Model ID (default: Claude Sonnet 4)
-    subagents=None,                      # List of sub-agent configs
-    initial_state=None,                  # Initial state dict
-    disable_parallel_tool_calling=False, # Force sequential execution
+    instructions="System prompt for the agent",
+    model=None,                          # Default: Claude Sonnet 4
+    subagents=None,                      # List of SubAgent configs
+    tools=None,                          # Additional custom tools
     session_manager=None,                # For persistence
+    disable_parallel_tool_calling=False, # Force sequential execution
     **kwargs                             # Additional Agent params
 )
 ```
 
-**Returns:** `Agent` instance
+### `SubAgent`
 
-### `async_create_deep_agent()`
-
-Create an asynchronous deep agent (same parameters as `create_deep_agent`).
+Define specialized sub-agents:
 
 ```python
-agent = await async_create_deep_agent(
-    instructions="You are a helpful assistant.",
-    model="global.anthropic.claude-sonnet-4-5-20250929-v1:0"
-)
+from strands_deep_agents import SubAgent
 
-result = await agent.invoke_async("Your task here")
+subagent = SubAgent(
+    name="unique_name",
+    description="When to use this agent (helps main agent decide)",
+    prompt="System prompt for sub-agent",
+    tools=[...],     # Optional: specific tools
+    model=model      # Optional: override model
+)
 ```
 
-### Sub-agent Configuration
+### Async Support
 
 ```python
-subagent = {
-    "name": "unique_name",           # Identifier
-    "description": "When to use this agent",  # Helps main agent decide
-    "prompt": "System prompt for sub-agent",  # Instructions
-    "tools": [...],                  # Optional: specific tools
-    "model": "model-id",            # Optional: override model
-}
+from strands_deep_agents import async_create_deep_agent
+
+agent = await async_create_deep_agent(
+    instructions="You are a research assistant."
+)
+result = await agent.invoke_async("Your task")
 ```
 
 ## Configuration
@@ -407,7 +295,7 @@ subagent = {
 ### Environment Variables
 
 ```bash
-# AWS Bedrock
+# AWS Bedrock (default provider)
 export AWS_REGION=us-east-1
 export AWS_ACCESS_KEY_ID=your_key
 export AWS_SECRET_ACCESS_KEY=your_secret
@@ -419,7 +307,7 @@ export BYPASS_TOOL_CONSENT=true
 ### Model Options
 
 ```python
-# AWS Bedrock models
+# Use AWS Bedrock models (default)
 agent = create_deep_agent(
     model="global.anthropic.claude-sonnet-4-5-20250929-v1:0"
 )
@@ -436,55 +324,41 @@ custom_model = Model(
 agent = create_deep_agent(model=custom_model)
 ```
 
-## Examples
+## Additional Examples
 
-The `examples/` directory contains ready-to-run demonstrations:
+The `examples/` directory contains more patterns:
 
 ```bash
-# Basic usage
+# Basic agent usage
 python examples/basic_usage.py
 
-# Sub-agent patterns
+# Sub-agent delegation patterns
 python examples/sub_agents.py
 
 # Session persistence
 python examples/session_persistence.py
 
-# Sequential execution
-python examples/sequential_execution.py
-
-# Advanced research agent
+# DeepSearch - Advanced research agent (recommended)
 cd examples/deepsearch
 python agent.py
 ```
 
 ## Best Practices
 
-1. **Write Clear Instructions** - Be specific about what the agent should do
-2. **Use Sub-agents for Specialization** - Delegate complex subtasks to focused agents
-3. **Enable Planning** - Let the agent break down complex tasks
-4. **Leverage Context Quarantine** - Use sub-agents to isolate subtasks and prevent context pollution
-5. **Save State** - Use session persistence for long-running projects
-6. **Sequential for Debugging** - Use `disable_parallel_tool_calling=True` when debugging
-
-## Troubleshooting
-
-### Agent not creating TODOs
-Explicitly ask for planning: "Create a plan first, then execute"
-
-### Sub-agent not being called
-Make sub-agent descriptions specific and relevant to the task
-
-### State not persisting
-Ensure `session_manager` is provided and `session_id` is consistent
+1. **Clear Instructions** - Be specific about agent roles and expectations
+2. **Strategic Sub-agents** - Use sub-agents for specialized, focused tasks
+3. **Context Management** - Use file operations to keep context lean
+4. **Session Persistence** - Enable for long-running or resumable tasks
+5. **Prompt for Planning** - Encourage agents to create plans before execution
 
 
 ## Links
 
 - **GitHub**: https://github.com/lemopian/strands-deep-agents
-- **Strands Agents SDK**: https://github.com/strands-agents/sdk-python
+- **Strands Agents SDK**: https://github.com/strands-ai/strands-agents
+- **Article**: [Deep Agents Using Strands](http://pierreange.ai/blog/deep-agents-using-strands)
 - **Inspiration**: https://github.com/langchain-ai/deepagents
--
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) file for details.

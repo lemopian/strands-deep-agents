@@ -83,7 +83,7 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
         ),
         prompt=subagent_prompt,
         tools=[research_tool, file_write],
-        model=basic_claude_haiku_4_5(),  # Use Haiku to avoid streaming corruption with large responses
+        model=basic_claude_haiku_4_5(),
     )
 
     # Citations agent - adds source references to reports
@@ -96,9 +96,8 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
         ),
         model=basic_claude_haiku_4_5(),
         prompt=CITATIONS_AGENT_PROMPT,
-        tools=[file_read, file_write],  # No tools needed - just text processing
+        tools=[file_read, file_write],
     )
-    # Disable session persistence to avoid massive context accumulation
     session_id = "example-task-session"
     storage_dir = "./.agent_sessions"
     session_manager = FileSessionManager(
@@ -106,7 +105,6 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
         storage_dir=storage_dir,
     )
 
-    # Create the research lead agent
     agent = create_deep_agent(
         instructions=lead_prompt
         + """

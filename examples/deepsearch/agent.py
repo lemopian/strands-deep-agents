@@ -79,7 +79,8 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
             "Specialized research agent for conducting focused investigations on specific topics. "
             "Use this agent to research specific questions, gather facts, analyze sources, and compile findings. "
             f"This agent has access to {tool_name} for comprehensive web search capabilities. "
-            "Results are written to files to keep context lean."
+            "Results are written to files to keep context lean. "
+            "Source documents are saved to research_documents_[topic]/ directories for citation purposes."
         ),
         prompt=subagent_prompt,
         tools=[research_tool, file_write],
@@ -92,7 +93,8 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
         description=(
             "Specialized agent for adding citations to research reports. "
             "Use this agent after completing a research report to add proper source citations. "
-            "Provide the report text in <synthesized_text> tags along with the source list."
+            "This agent reads the synthesized report and all source documents from research_documents_[topic]/ directories. "
+            "It then adds proper inline citations and a references section."
         ),
         model=basic_claude_haiku_4_5(),
         prompt=CITATIONS_AGENT_PROMPT,
@@ -106,17 +108,7 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
     )
 
     agent = create_deep_agent(
-        instructions=lead_prompt
-        + """
-
-IMPORTANT CONTEXT MANAGEMENT:
-- Research subagents write their findings to files (./research_findings_*.md) in the current directory to keep context lean
-- When ready to synthesize, use file_read to read the research findings files from the current directory (./research_findings_*.md)
-- Synthesize all findings into a comprehensive report
-- Write the final report to the requested filename using file_write with current directory prefix (e.g., ./report_name.md)
-- ALWAYS use the current directory prefix `./` for all file paths
-- At the end, Call the citations agent to add the citations to the report.
-""",
+        instructions=lead_prompt,
         subagents=[research_subagent, citations_agent],
         tools=[file_read, file_write],
         session_manager=session_manager,
@@ -135,18 +127,7 @@ def main():
         "-p",
         "--prompt",
         type=str,
-        default="""
-    Research the current state of AI safety in 2025:
-
-1. What are the main AI safety concerns and challenges?
-2. What organizations and initiatives are leading AI safety research?
-
-Create a comprehensive research report with:
--- Executive summary
--- Detailed findings for each question
-
-Plan your research approach using multiple research subagents for different aspects.
-""",
+        default="""Current state of AI safety in 2025.""",
     )
     args = parser.parse_args()
     prompt = args.prompt

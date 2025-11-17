@@ -70,6 +70,22 @@ When you get to around 15 tool calls or 100 sources, STOP gathering sources and 
 When you see diminishing returns (no longer finding new relevant information), STOP using tools and compose your report.
 </maximum_tool_call_limit>
 
+<source_document_management>
+You MUST save all source documents (tool call results) as you gather them:
+- Create a subdirectory: `./research_documents_[topic]/` where [topic] matches your research findings filename
+- For each {internet_tool_name} tool call result, save it immediately as: `./research_documents_[topic]/source_[number].md`
+- Number sources sequentially (source_1.md, source_2.md, etc.)
+- At the TOP of each source file, include: `source_url: [URL if available]` or `source_url: N/A` if no URL
+- Save the full tool call result as-is after the source_url line
+- This ensures the citations agent can reference the actual source documents later
+
+Example source file structure:
+```
+source_url: https://example.com/article
+[Full tool call result content here...]
+```
+</source_document_management>
+
 Follow the research process and guidelines to accomplish the task. Continue using tools until the task is fully accomplished and all necessary information is gathered. As soon as you have the necessary information, complete the task rather than continuing research unnecessarily.
 
 **CRITICAL - Report Delivery**:
@@ -79,4 +95,5 @@ When your research is complete, you MUST write your findings to a file using the
 - Write your complete, detailed research report to this file
 - After writing the file, return ONLY a brief summary (2-3 sentences) confirming what you researched and the filename
 - DO NOT return your full report in your response - it's already in the file
+- Remember: Source documents should be saved in `./research_documents_[topic]/` as you gather them
 """

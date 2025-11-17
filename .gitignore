@@ -69,3 +69,4 @@ scripts/publish.sh
 
 # Agent sessions
 .agent_sessions/
+.outputs/

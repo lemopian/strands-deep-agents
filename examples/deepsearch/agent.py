@@ -23,7 +23,7 @@ from tools import internet_search
 from urllib3.exceptions import ProtocolError
 
 from strands_deep_agents import SubAgent, create_deep_agent
-from strands_deep_agents.ai_models import basic_claude_haiku_4_5
+from strands_deep_agents.ai_models import basic_claude_haiku_4_5, get_default_model
 
 # Configure logging for better visibility
 # Use a file handler to avoid console output corruption during streaming
@@ -67,7 +67,6 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
             raise ValueError(
                 "Tool name not provided and could not be auto-detected, pass it as a string"
             )
-
     # Format prompts with the internet tool name
     lead_prompt = RESEARCH_LEAD_PROMPT.format(internet_tool_name=tool_name)
     subagent_prompt = RESEARCH_SUBAGENT_PROMPT.format(internet_tool_name=tool_name)
@@ -84,7 +83,7 @@ def create_deepsearch_agent(research_tool=tavily, tool_name: str | None = None):
         ),
         prompt=subagent_prompt,
         tools=[research_tool, file_write],
-        model=basic_claude_haiku_4_5(),
+        model=get_default_model(),
     )
 
     # Citations agent - adds source references to reports
